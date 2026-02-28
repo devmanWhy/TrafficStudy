@@ -2,6 +2,7 @@ package com.devy.trafficstudypart3.config;
 
 import org.apache.catalina.core.StandardThreadExecutor;
 import org.apache.coyote.ProtocolHandler;
+import org.apache.coyote.http11.Http11NioProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.tomcat.servlet.TomcatServletWebServerFactory;
@@ -13,9 +14,11 @@ public class TomcatConfig implements WebServerFactoryCustomizer<TomcatServletWeb
     @Override
     public void customize(TomcatServletWebServerFactory factory) {
         factory.addConnectorCustomizers(connector -> {
+
             ProtocolHandler protocolHandler = connector.getProtocolHandler();
+
             StandardThreadExecutor executor = new CustomThreadExecutor();
-            executor.setMaxThreads(2);
+            executor.setMaxThreads(1);
             executor.setMinSpareThreads(1);
             executor.setMaxQueueSize(10);
             protocolHandler.setExecutor(executor);
