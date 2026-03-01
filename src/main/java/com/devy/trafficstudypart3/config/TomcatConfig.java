@@ -18,7 +18,7 @@ public class TomcatConfig implements WebServerFactoryCustomizer<TomcatServletWeb
             ProtocolHandler protocolHandler = connector.getProtocolHandler();
 
             StandardThreadExecutor executor = new CustomThreadExecutor();
-            executor.setMaxThreads(1);
+            executor.setMaxThreads(10);
             executor.setMinSpareThreads(1);
             executor.setMaxQueueSize(10);
             protocolHandler.setExecutor(executor);

@@ -12,8 +12,9 @@ public class ThreadController {
     private Logger log = LoggerFactory.getLogger(ThreadController.class);
 
     @GetMapping
-    public String getThreads() {
+    public String getThreads() throws InterruptedException {
         log.info("Thread is : {}", Thread.currentThread().getName());
+        Thread.sleep(1000);
         return "OK";
     }
 }
