@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-//@Component
+@Component
 public class RateLimiterFilter implements Filter {
 
     private final RateLimiterRegistry rateLimiterRegistry;

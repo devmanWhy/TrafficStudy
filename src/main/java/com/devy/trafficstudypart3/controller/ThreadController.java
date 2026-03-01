@@ -14,7 +14,6 @@ public class ThreadController {
     @GetMapping
     public String getThreads() throws InterruptedException {
         log.info("Thread is : {}", Thread.currentThread().getName());
-        Thread.sleep(1000);
         return "OK";
     }
 }

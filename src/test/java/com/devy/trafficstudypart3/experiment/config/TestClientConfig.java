@@ -17,8 +17,8 @@ public class TestClientConfig {
     public HttpClient defaultHttpClient() {
         // Connection Pool 설정 + Connection Timeout 설정
         PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
-        connectionManager.setMaxTotal(5); // Connection Total Size => 이 커넥션 풀이 가질 수 있는 최대 커넥션 수
-        connectionManager.setDefaultMaxPerRoute(1); // Route당 최대 커넥션 수 => Route => 스키마://호스트:포트
+        connectionManager.setMaxTotal(100); // Connection Total Size => 이 커넥션 풀이 가질 수 있는 최대 커넥션 수
+        connectionManager.setDefaultMaxPerRoute(10); // Route당 최대 커넥션 수 => Route => 스키마://호스트:포트
 
         // 전체 사용가능한 커넥션은 5개이고 라우트 당 1개까지만 사용가능
         connectionManager.setDefaultConnectionConfig(
