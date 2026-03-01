@@ -1,1 +1,6 @@
 rootProject.name = 'TrafficStudyPart3'
+
+include 'orders'
+include 'products'
+include 'payments'
+include 'common'
