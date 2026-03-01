@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option java_multiple_files = true; // Protocol Buffers 버전
+option java_package = "com.devy.products.grpc"; // 빌드 후 생성될 패키지 경로
+option java_outer_classname = "ProductServiceProto"; // 래퍼클래스 명
+
+package products; // proto 파일의 네임스페이스
+
+service ProductService {
+  rpc Hold (HoldProductRequest) returns (HoldProductResponse);
+}
+
+message HoldProductRequest {
+  string product_id = 1;
+  int32 quantity = 2;
+}
+
+message HoldProductResponse {
+  string status = 1;
+}

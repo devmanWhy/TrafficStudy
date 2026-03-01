@@ -11,8 +11,8 @@ public class OrderServiceImpl implements OrderService {
 
     private final ProductsRepository productsRestRepository;
 
-    public OrderServiceImpl(ProductsRepository productsRestRepository) {
-        this.productsRestRepository = productsRestRepository;
+    public OrderServiceImpl(ProductsRepository productsGrpcRepository) {
+        this.productsRestRepository = productsGrpcRepository;
     }
 
     @Override

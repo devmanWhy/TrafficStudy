@@ -1,6 +1,9 @@
+apply plugin: 'com.google.protobuf'
+
 dependencies {
     implementation project(":common")
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    implementation 'org.springframework.grpc:spring-grpc-server-web-spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
     implementation 'org.springframework.boot:spring-boot-starter-aop:4.0.0-M2'
@@ -8,6 +11,23 @@ dependencies {
     implementation 'io.micrometer:micrometer-registry-prometheus'
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:4.33.4"
+    }
+    plugins {
+        grpc {
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.77.1'
+        }
+    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
 }
 
 bootJar {

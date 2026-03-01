@@ -1,0 +1,6 @@
+GRPC localhost:8081/products.ProductService/Hold
+
+{
+  "product_id": "productId-001",
+  "quantity" : 100
+}
