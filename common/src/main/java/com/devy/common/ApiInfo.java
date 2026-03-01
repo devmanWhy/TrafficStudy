@@ -13,7 +13,7 @@ public class ApiInfo {
 
     }
 
-    public static class INVENTORY {
+    public static class PRODUCTS {
         public static final String SCHEME = "http://";
         public static final String HOST = "localhost";
         public static final String PORT = "8081";
