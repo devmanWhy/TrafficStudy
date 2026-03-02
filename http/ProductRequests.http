@@ -4,3 +4,13 @@ GRPC localhost:8081/products.ProductService/Hold
   "product_id": "productId-001",
   "quantity" : 100
 }
+
+
+###
+POST localhost:8081/api/v1/products/hold
+Content-Type: application/json
+
+{
+  "productId": "productId-001",
+  "quantity" : 100
+}

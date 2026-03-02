@@ -12,7 +12,7 @@ public class ProductGrpcService extends ProductServiceGrpc.ProductServiceImplBas
 
     @Override
     public void hold(HoldProductRequest request, StreamObserver<HoldProductResponse> responseObserver) {
-        log.info("\uD83C\uDF81 : Product held successfully for : " + request);
+        log.info("\uD83C\uDF81 gRPC : Product held successfully for : " + request);
         responseObserver.onNext(
                 HoldProductResponse.newBuilder()
                         .setStatus("Held")
