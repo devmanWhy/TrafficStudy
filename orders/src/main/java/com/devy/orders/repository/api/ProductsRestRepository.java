@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.web.client.RestClient;
 
 import java.util.HashMap;
+import java.util.concurrent.CompletableFuture;
 
 @Repository
 public class ProductsRestRepository implements ProductsRepository {
@@ -28,5 +29,10 @@ public class ProductsRestRepository implements ProductsRepository {
         ).retrieve();
         log.info("\uD83D\uDCDE : Received From Product Service : " + retrieve.body(String.class));
         return "OK";
+    }
+
+    @Override
+    public CompletableFuture<String> asyncHoldProduct(String productId, int quantity) {
+        throw new UnsupportedOperationException();
     }
 }

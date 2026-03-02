@@ -5,6 +5,8 @@ import com.devy.products.grpc.HoldProductResponse;
 import com.devy.products.grpc.ProductServiceGrpc;
 import org.springframework.stereotype.Repository;
 
+import java.util.concurrent.CompletableFuture;
+
 @Repository
 public class ProductsGrpcRepository implements ProductsRepository {
 
@@ -22,5 +24,10 @@ public class ProductsGrpcRepository implements ProductsRepository {
                 .setQuantity(quantity)
                 .build());
         return hold.getStatus();
+    }
+
+    @Override
+    public CompletableFuture<String> asyncHoldProduct(String productId, int quantity) {
+        throw new UnsupportedOperationException();
     }
 }

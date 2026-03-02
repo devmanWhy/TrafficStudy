@@ -12,7 +12,7 @@ public class OrderServiceImpl implements OrderService {
 
     private final ProductsRepository productsRepository;
 
-    public OrderServiceImpl(@Qualifier("productsGrpcRepository") ProductsRepository productsRepository) {
+    public OrderServiceImpl(@Qualifier("productsAsyncRestRepository") ProductsRepository productsRepository) {
         this.productsRepository = productsRepository;
     }
 

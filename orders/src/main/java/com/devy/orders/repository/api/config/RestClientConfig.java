@@ -1,11 +1,16 @@
 package com.devy.orders.repository.api.config;
 
 import com.devy.common.ApiInfo;
+import org.apache.hc.client5.http.async.HttpAsyncClient;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
+import org.apache.hc.client5.http.impl.async.HttpAsyncClients;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManager;
+import org.apache.hc.core5.reactor.IOReactorConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -42,10 +47,39 @@ public class RestClientConfig {
     }
 
     @Bean
+    public HttpAsyncClient defaultHttpAsyncClient() {
+        // Connection Pool 설정 + Connection Timeout 설정
+        PoolingAsyncClientConnectionManager connectionManager =
+                new PoolingAsyncClientConnectionManager();
+        connectionManager.setMaxTotal(100);
+        connectionManager.setDefaultMaxPerRoute(10);
+
+        IOReactorConfig ioReactorConfig = IOReactorConfig.custom()
+                .setSoTimeout(3, TimeUnit.SECONDS)
+                .build();
+
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectionRequestTimeout(1, TimeUnit.SECONDS)
+                .setResponseTimeout(1, TimeUnit.SECONDS)
+                .build();
+
+        CloseableHttpAsyncClient client = HttpAsyncClients.custom()
+                .setConnectionManager(connectionManager)
+                .setIOReactorConfig(ioReactorConfig)
+                .setDefaultRequestConfig(requestConfig)
+                .build();
+
+        client.start();
+
+        return client;
+    }
+
+    @Bean
     public RestClient productsRestClient(HttpClient httpClient) {
         return RestClient.builder()
                 .baseUrl(ApiInfo.PRODUCTS.BASE_URL)
                 .requestFactory(new HttpComponentsClientHttpRequestFactory(httpClient))
                 .build();
     }
+
 }
