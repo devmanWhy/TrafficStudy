@@ -2,8 +2,8 @@ POST http://localhost:8080/api/v1/orders/place
 Content-Type: application/json
 
 {
-  "userId": "user123",
-  "productId": "product456",
+  "userId": "user-001",
+  "productId": "product-004",
   "quantity": 100,
   "totalAmount": 50000
 }

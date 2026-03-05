@@ -37,6 +37,126 @@ services:
     depends_on:
       - prometheus
 
+  kafka-1:
+    image: confluentinc/cp-kafka:7.8.0
+    container_name: traffic-study-kafka-001
+    ports:
+      - "19092:19092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://kafka-1:9092,CONTROLLER://kafka-1:9093,PLAINTEXT_HOST://0.0.0.0:19092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1:9092,PLAINTEXT_HOST://localhost:19092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+      # SASL 인증 설정
+      KAFKA_SASL_ENABLED_MECHANISMS: PLAIN
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+      KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf"
+      # 로그 설정
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824
+      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 300000
+    volumes:
+      - ./kafka/data-1:/var/lib/kafka/data
+      - ./kafka/kafka_server_jaas.conf:/etc/kafka/kafka_server_jaas.conf
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:19092 || exit 1" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  kafka-2:
+    image: confluentinc/cp-kafka:7.8.0
+    container_name: traffic-study-kafka-002
+    ports:
+      - "19093:19093"
+    environment:
+      KAFKA_NODE_ID: 2
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://kafka-2:9092,CONTROLLER://kafka-2:9093,PLAINTEXT_HOST://0.0.0.0:19093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:9092,PLAINTEXT_HOST://localhost:19093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+      # SASL 인증 설정
+      KAFKA_SASL_ENABLED_MECHANISMS: PLAIN
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+      KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf"
+      # 로그 설정
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824
+      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 300000
+    volumes:
+      - ./kafka/data-2:/var/lib/kafka/data
+      - ./kafka/kafka_server_jaas.conf:/etc/kafka/kafka_server_jaas.conf
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:19093 || exit 1" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  kafka-3:
+    image: confluentinc/cp-kafka:7.8.0
+    container_name: traffic-study-kafka-003
+    ports:
+      - "19094:19094"
+    environment:
+      KAFKA_NODE_ID: 3
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://kafka-3:9092,CONTROLLER://kafka-3:9093,PLAINTEXT_HOST://0.0.0.0:19094
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-3:9092,PLAINTEXT_HOST://localhost:19094
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+      # SASL 인증 설정
+      KAFKA_SASL_ENABLED_MECHANISMS: PLAIN
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+      KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf"
+      # 로그 설정
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824
+      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 300000
+    volumes:
+      - ./kafka/data-3:/var/lib/kafka/data
+      - ./kafka/kafka_server_jaas.conf:/etc/kafka/kafka_server_jaas.conf
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:19094 || exit 1" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  # Kafka UI (선택사항 - 모니터링용)
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: traffic-study-kafka-ui-optional
+    ports:
+      - "19090:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: traffic-study-cluster
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-1:9092,kafka-2:9092,kafka-3:9092
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: debezium-connect
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://kafka-connect:8083
+      DYNAMIC_CONFIG_ENABLED: 'true'
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+    restart: always
+
 networks:
   monitoring:
     driver: bridge

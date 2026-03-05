@@ -1,2 +1,11 @@
 server:
   port: 8080
+
+spring:
+  kafka:
+    bootstrap-servers: localhost:19092,localhost:19093,localhost:19094
+    # Producer 설정
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
