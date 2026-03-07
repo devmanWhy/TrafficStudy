@@ -1,5 +1,7 @@
 package com.devy.orders.repository.message;
 
+import com.devy.common.event.order.OrderPlacedEvent;
+import com.devy.orders.controller.request.PlaceOrderRequestDTO;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Repository;
@@ -26,6 +28,18 @@ public class ProductsKafkaMessageRepository implements ProductsMessageRepository
                             put("productId", productId);
                             put("quantity", quantity);
                         }}
+                )));
+    }
+
+    @Override
+    public void holdProduct(PlaceOrderRequestDTO requestDTO, String orderId) {
+        kafkaTemplate.send(new ProducerRecord<>("orderEvent", null,
+                objectMapper.writeValueAsString(
+                        new OrderPlacedEvent(orderId,
+                                requestDTO.userId(),
+                                requestDTO.productId(),
+                                requestDTO.quantity(),
+                                requestDTO.totalAmount())
                 )));
     }
 }

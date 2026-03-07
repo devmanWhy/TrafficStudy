@@ -20,6 +20,8 @@ public class ApiInfo {
         public static final String VERSION = "v1";
         public static final String BASE_PATH = "/api/" + VERSION;
         public static final String BASE_URL = SCHEME + HOST + ":" + PORT + "/api/" + VERSION;
+
+        public static final String PRODUCT_PATH = "/products";
     }
 
     public static class PAYMENTS {

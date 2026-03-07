@@ -1,6 +1,7 @@
 package com.devy.orders.repository.api;
 
 import com.devy.common.ApiInfo;
+import com.devy.orders.repository.api.response.SearchProductInfoResponseDTO;
 import org.apache.hc.client5.http.async.HttpAsyncClient;
 import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
 import org.apache.hc.client5.http.async.methods.SimpleHttpResponse;
@@ -127,5 +128,10 @@ public class ProductsAsyncRestRepository implements ProductsRepository {
             }
         });
         return future;
+    }
+
+    @Override
+    public SearchProductInfoResponseDTO searchProductInfo(String productId) {
+        throw new UnsupportedOperationException();
     }
 }

@@ -9,7 +9,7 @@ spring:
     consumer:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      group-id: traffic-study-group
+      group-id: traffic-study-group-products
       auto-offset-reset: earliest
       enable-auto-commit: false
       properties:
@@ -24,3 +24,28 @@ spring:
     listener:
       ack-mode: manual
       concurrency: 3
+  # MySQL 설정
+  datasource:
+    url: jdbc:mysql://localhost:13306/traffic_study?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+    username: study
+    password: traffic
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      pool-name: TrafficStudy-HikariCP
+  jpa:
+    hibernate:
+      ddl-auto: update  # 운영: validate, 개발: update, 초기: create
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+        use_sql_comments: true
+        highlight_sql: true
+        default_batch_fetch_size: 100
+    open-in-view: false

@@ -2,7 +2,9 @@ package com.devy.orders.controller;
 
 import com.devy.common.ApiInfo;
 import com.devy.orders.controller.request.PlaceOrderRequestDTO;
+import com.devy.orders.controller.request.SearchOrderInfoRequestDTO;
 import com.devy.orders.controller.response.PlaceOrderResponseDTO;
+import com.devy.orders.controller.response.SearchOrderInfoResponseDTO;
 import com.devy.orders.service.OrderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,5 +26,10 @@ public class OrderController {
     public ResponseEntity<PlaceOrderResponseDTO> placeOrder(@RequestBody PlaceOrderRequestDTO request) {
         String orderId = orderService.placeOrder(request);
         return ResponseEntity.ok(new PlaceOrderResponseDTO(orderId, "OK"));
+    }
+
+    @PostMapping("/search")
+    public ResponseEntity<SearchOrderInfoResponseDTO> searchOrder(@RequestBody SearchOrderInfoRequestDTO request) {
+        return ResponseEntity.ok(orderService.searchOrder(request));
     }
 }

@@ -1,5 +1,7 @@
 package com.devy.orders.repository.api;
 
+import com.devy.orders.repository.api.response.HoldProductResponseDTO;
+import com.devy.orders.repository.api.response.SearchProductInfoResponseDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -27,12 +29,20 @@ public class ProductsRestRepository implements ProductsRepository {
                     put("quantity", quantity);
                 }}
         ).retrieve();
-        log.info("\uD83D\uDCDE : Received From Product Service : " + retrieve.body(String.class));
+        log.info("\uD83D\uDCDE : Received From Product Service : " + retrieve.body(HoldProductResponseDTO.class));
         return "OK";
     }
 
     @Override
     public CompletableFuture<String> asyncHoldProduct(String productId, int quantity) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public SearchProductInfoResponseDTO searchProductInfo(String productId) {
+        RestClient.ResponseSpec retrieve = productsRestClient.post().uri("/products/search").body(new HashMap<String, Object>() {{
+            put("productId", productId);
+        }}).retrieve();
+        return retrieve.body(SearchProductInfoResponseDTO.class);
     }
 }

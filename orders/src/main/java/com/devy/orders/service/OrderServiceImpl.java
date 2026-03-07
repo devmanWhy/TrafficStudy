@@ -1,26 +1,69 @@
 package com.devy.orders.service;
 
 import com.devy.orders.controller.request.PlaceOrderRequestDTO;
+import com.devy.orders.controller.request.SearchOrderInfoRequestDTO;
+import com.devy.orders.controller.response.SearchOrderInfoResponseDTO;
+import com.devy.orders.domain.Orders;
+import com.devy.orders.repository.api.PaymentsRepository;
 import com.devy.orders.repository.api.ProductsRepository;
-import com.devy.orders.repository.message.ProductsMessageRepository;
+import com.devy.orders.repository.api.response.SearchPaymentInfoResponseDTO;
+import com.devy.orders.repository.api.response.SearchProductInfoResponseDTO;
+import com.devy.orders.repository.db.OrderRepository;
+import com.devy.orders.repository.message.OrderEventMessageRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class OrderServiceImpl implements OrderService {
 
-    private final ProductsMessageRepository productsRepository;
+    private final OrderEventMessageRepository orderEventMessageRepository;
+    private final OrderRepository orderRepository;
+    private final ProductsRepository productsRepository;
+    private final PaymentsRepository paymentsRepository;
 
-    public OrderServiceImpl(ProductsMessageRepository productsRepository) {
+    public OrderServiceImpl(
+            OrderEventMessageRepository orderEventMessageRepository,
+            OrderRepository orderRepository,
+            @Qualifier("productsRestRepository") ProductsRepository productsRepository,
+            PaymentsRepository paymentsRepository
+    ) {
+        this.orderEventMessageRepository = orderEventMessageRepository;
+        this.orderRepository = orderRepository;
         this.productsRepository = productsRepository;
+        this.paymentsRepository = paymentsRepository;
     }
 
     @Override
     public String placeOrder(PlaceOrderRequestDTO request) {
         String orderId = UUID.randomUUID().toString().replace("-", "");
+        orderRepository.save(new Orders(orderId, request.userId(), request.productId(), request.quantity(), request.totalAmount()));
         productsRepository.holdProduct(request.productId(), request.quantity());
+        paymentsRepository.pay(orderId, request.userId(), request.totalAmount());
         return orderId;
+    }
+
+    @Override
+    public SearchOrderInfoResponseDTO searchOrder(SearchOrderInfoRequestDTO request) {
+        Optional<Orders> existsOrderOptional = orderRepository.findById(request.orderId());
+        if (existsOrderOptional.isEmpty()) {
+            return null;
+        }
+        Orders existsOrders = existsOrderOptional.get();
+        SearchProductInfoResponseDTO searchProductInfoResponseDTO = productsRepository.searchProductInfo(existsOrders.getProductsId());
+        SearchPaymentInfoResponseDTO searchPaymentInfoResponseDTO = paymentsRepository.searchPaymentInfo(existsOrders.getOrderId(), existsOrders.getUserId());
+        return new SearchOrderInfoResponseDTO(
+                existsOrders.getOrderId(),
+                existsOrders.getUserId(),
+                existsOrders.getProductsId(),
+                searchProductInfoResponseDTO.name(),
+                searchProductInfoResponseDTO.price(),
+                existsOrders.getQuantity(),
+                searchPaymentInfoResponseDTO.amount(),
+                existsOrders.getOrderAt(),
+                searchPaymentInfoResponseDTO.paidAt()
+        );
     }
 }

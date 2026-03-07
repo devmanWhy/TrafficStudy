@@ -2,6 +2,8 @@ server:
   port: 8080
 
 spring:
+  config:
+    import: classpath:configs/circuit.yml, classpath:configs/ratelimiter.yml
   kafka:
     bootstrap-servers: localhost:19092,localhost:19093,localhost:19094
     # Producer 설정
@@ -9,3 +11,28 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
       acks: all
+  # MySQL 설정
+  datasource:
+    url: jdbc:mysql://localhost:13306/traffic_study?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+    username: study
+    password: traffic
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      pool-name: TrafficStudy-HikariCP
+  jpa:
+    hibernate:
+      ddl-auto: update  # 운영: validate, 개발: update, 초기: create
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+        use_sql_comments: true
+        highlight_sql: true
+        default_batch_fetch_size: 100
+    open-in-view: false

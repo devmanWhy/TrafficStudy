@@ -1,5 +1,6 @@
 package com.devy.orders.repository.api;
 
+import com.devy.orders.repository.api.response.SearchProductInfoResponseDTO;
 import com.devy.products.grpc.HoldProductRequest;
 import com.devy.products.grpc.HoldProductResponse;
 import com.devy.products.grpc.ProductServiceGrpc;
@@ -28,6 +29,11 @@ public class ProductsGrpcRepository implements ProductsRepository {
 
     @Override
     public CompletableFuture<String> asyncHoldProduct(String productId, int quantity) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public SearchProductInfoResponseDTO searchProductInfo(String productId) {
         throw new UnsupportedOperationException();
     }
 }

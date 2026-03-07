@@ -82,4 +82,12 @@ public class RestClientConfig {
                 .build();
     }
 
+    @Bean
+    public RestClient paymentsRestClient(HttpClient httpClient) {
+        return RestClient.builder()
+                .baseUrl(ApiInfo.PAYMENTS.BASE_URL)
+                .requestFactory(new HttpComponentsClientHttpRequestFactory(httpClient))
+                .build();
+    }
+
 }

@@ -1,0 +1,10 @@
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 5 # 판단할 기준 (ex. 최근 몇개의 요청을 기준으로 판단할건지?)
+        sliding-window-type: count_based # window-size 는 어떤 것을 기준으로 카운트할지
+        minimum-number-of-calls: 3 # 서킷 작동 기준 호출 수
+        permitted-number-of-calls-in-half-open-state: 2 # half-open 상태에서 허용할 호출 수
+        wait-duration-in-open-state: 3s # 서킷이 열린 상태로 있는 시간
+        failure-rate-threshold: 50 # 실패율 기준
