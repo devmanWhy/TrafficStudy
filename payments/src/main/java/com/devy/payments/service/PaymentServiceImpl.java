@@ -23,6 +23,11 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public boolean pay(String orderId, String userId, long amount) {
         log.info("Paying order: {} for amount: {}", orderId, amount);
+        try {
+            Thread.sleep(10_000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         String paymentId = java.util.UUID.randomUUID().toString();
         paymentRepository.save(new Payment(paymentId, orderId, userId, amount));
         return true;
@@ -31,6 +36,11 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public SearchPaymentInfoResponseDTO searchPaymentsInfo(SearchPaymentInfoRequestDTO request) {
         log.info("Searching payments info for order: {}", request);
+        try {
+            Thread.sleep(10_000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         Optional<Payment> existsPaymentOptional = paymentRepository.findByOrderIdAndUserId(request.orderId(), request.userId());
         if (existsPaymentOptional.isPresent()) {
             Payment existsPayment = existsPaymentOptional.get();

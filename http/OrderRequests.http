@@ -3,19 +3,8 @@ Content-Type: application/json
 
 {
   "userId": "user-001",
-  "productId": "product-0",
-  "quantity": 10,
-  "totalAmount": 6000
-}
-###
-
-POST http://localhost:8080/api/v1/orders/place
-Content-Type: application/json
-
-{
-  "userId": "user-001",
-  "productId": "product-0",
-  "quantity": 10,
+  "productId": "product-3",
+  "quantity": 5,
   "totalAmount": 6000
 }
 ###
@@ -24,6 +13,6 @@ Content-Type: application/json
 
 {
   "userId": "user-001",
-"orderId": "a4cb35d261ca4a93a49c5663e3da58a1"
+"orderId": "639c4981b5b842c29726fd8d766e2d55"
 }
 

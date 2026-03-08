@@ -60,7 +60,7 @@ public class RestClientConfig {
 
         RequestConfig requestConfig = RequestConfig.custom()
                 .setConnectionRequestTimeout(1, TimeUnit.SECONDS)
-                .setResponseTimeout(1, TimeUnit.SECONDS)
+//                .setResponseTimeout(1, TimeUnit.SECONDS)
                 .build();
 
         CloseableHttpAsyncClient client = HttpAsyncClients.custom()

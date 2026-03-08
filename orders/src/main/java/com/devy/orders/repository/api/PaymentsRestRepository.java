@@ -20,7 +20,7 @@ public class PaymentsRestRepository implements PaymentsRepository {
         this.paymentsRestClient = paymentsRestClient;
     }
 
-    @CircuitBreaker(name = "payments-service", fallbackMethod = "searchPaymentInfoFallback")
+    @CircuitBreaker(name = "payments-service", fallbackMethod = "fallbackSearchPaymentInfo")
     @Override
     public SearchPaymentInfoResponseDTO searchPaymentInfo(String orderId, String userId) {
         RestClient.ResponseSpec retrieve = paymentsRestClient.post().uri("/payments/search").body(new HashMap<String, Object>() {{
@@ -30,8 +30,9 @@ public class PaymentsRestRepository implements PaymentsRepository {
         return retrieve.body(SearchPaymentInfoResponseDTO.class);
     }
 
-    public SearchPaymentInfoResponseDTO searchPaymentInfoFallback(String orderId, String userId, Throwable throwable) {
-        log.error("Error occurred while calling payments service : " + throwable.getMessage());
+    public SearchPaymentInfoResponseDTO fallbackSearchPaymentInfo(String orderId, String userId, Throwable throwable) {
+        log.warn("Warn in searching payment info for order: {} and user: {}", orderId, userId, throwable);
+
         return new SearchPaymentInfoResponseDTO(
                 orderId,
                 0,

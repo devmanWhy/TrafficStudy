@@ -1,4 +1,4 @@
-package com.devy.orders.config.tomcat;
+package com.devy.orders.config;
 
 import org.apache.catalina.core.StandardThreadExecutor;
 import org.apache.coyote.ProtocolHandler;
@@ -11,11 +11,11 @@ public class TomcatConfig implements WebServerFactoryCustomizer<TomcatServletWeb
     @Override
     public void customize(TomcatServletWebServerFactory factory) {
         factory.addConnectorCustomizers(connector -> {
-            ProtocolHandler protocolHandler = connector.getProtocolHandler();
+            ProtocolHandler handler = connector.getProtocolHandler();
             StandardThreadExecutor executor = new StandardThreadExecutor();
             executor.setMaxThreads(1);
             executor.setMinSpareThreads(1);
-            protocolHandler.setExecutor(executor);
+            handler.setExecutor(executor);
         });
     }
 }

@@ -13,6 +13,10 @@ import org.springframework.stereotype.Component;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.Optional;
+
+import static com.devy.common.event.EventInfo.ORDERS.ORDER_PLACED_EVENT_CLASS;
+
 @Component
 public class OrderEventHandler {
 
@@ -33,17 +37,24 @@ public class OrderEventHandler {
         JsonNode jsonNode = objectMapper.readTree(message);
         JsonNode eventId = jsonNode.get("eventId");
         JsonNode eventType = jsonNode.get("eventType");
-        if (EventInfo.ORDERS.ORDER_PLACED_EVENT_CLASS.getName().equals(eventType.asString())) {
-            OrderPlacedEvent event = objectMapper.readValue(message, OrderPlacedEvent.class);
-            log.info("Received OrderPlacedEvent : {}", event);
-            productService.holdProduct(event.getProductId(), event.getQuantity());
+        Optional<ProcessedEvent> existEventOptional = processedEventRepository.findById(
+                new ProcessedEvent.ProcessedEventId(
+                        "product-" + eventId.asString(), eventType.asString())
+        );
+        if (existEventOptional.isEmpty()) {
 
+            if (ORDER_PLACED_EVENT_CLASS.getName().equals(eventType.asString())) {
+                OrderPlacedEvent orderPlacedEvent = objectMapper.readValue(message, ORDER_PLACED_EVENT_CLASS);
+                productService.holdProduct(orderPlacedEvent.getProductId(), orderPlacedEvent.getQuantity());
+                log.info("OrderPlacedEvent: {}", orderPlacedEvent);
+            }
+
+            processedEventRepository.save(new ProcessedEvent(
+                    "product-"+eventId.asString(),
+                    eventType.asString(),
+                    message
+            ));
         }
-        processedEventRepository.save(new ProcessedEvent(
-                eventId.asString(),
-                eventType.asString(),
-                message
-        ));
         acknowledgment.acknowledge();
     }
 }

@@ -1,5 +1,6 @@
 package com.devy.orders.service;
 
+import com.devy.common.event.order.OrderPlacedEvent;
 import com.devy.orders.controller.request.PlaceOrderRequestDTO;
 import com.devy.orders.controller.request.SearchOrderInfoRequestDTO;
 import com.devy.orders.controller.response.SearchOrderInfoResponseDTO;
@@ -19,29 +20,35 @@ import java.util.UUID;
 @Service
 public class OrderServiceImpl implements OrderService {
 
-    private final OrderEventMessageRepository orderEventMessageRepository;
     private final OrderRepository orderRepository;
     private final ProductsRepository productsRepository;
     private final PaymentsRepository paymentsRepository;
+    private final OrderEventMessageRepository orderEventMessageRepository;
 
     public OrderServiceImpl(
-            OrderEventMessageRepository orderEventMessageRepository,
             OrderRepository orderRepository,
             @Qualifier("productsRestRepository") ProductsRepository productsRepository,
-            PaymentsRepository paymentsRepository
+            PaymentsRepository paymentsRepository, OrderEventMessageRepository orderEventMessageRepository
     ) {
-        this.orderEventMessageRepository = orderEventMessageRepository;
         this.orderRepository = orderRepository;
         this.productsRepository = productsRepository;
         this.paymentsRepository = paymentsRepository;
+        this.orderEventMessageRepository = orderEventMessageRepository;
     }
 
     @Override
     public String placeOrder(PlaceOrderRequestDTO request) {
         String orderId = UUID.randomUUID().toString().replace("-", "");
         orderRepository.save(new Orders(orderId, request.userId(), request.productId(), request.quantity(), request.totalAmount()));
-        productsRepository.holdProduct(request.productId(), request.quantity());
-        paymentsRepository.pay(orderId, request.userId(), request.totalAmount());
+        orderEventMessageRepository.publish(
+                new OrderPlacedEvent(
+                        orderId,
+                        request.userId(),
+                        request.productId(),
+                        request.quantity(),
+                        request.totalAmount()
+                )
+        );
         return orderId;
     }
 
