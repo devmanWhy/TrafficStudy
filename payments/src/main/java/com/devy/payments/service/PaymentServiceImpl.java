@@ -23,11 +23,6 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public boolean pay(String orderId, String userId, long amount) {
         log.info("Paying order: {} for amount: {}", orderId, amount);
-        try {
-            Thread.sleep(10_000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
         String paymentId = java.util.UUID.randomUUID().toString();
         paymentRepository.save(new Payment(paymentId, orderId, userId, amount));
         return true;

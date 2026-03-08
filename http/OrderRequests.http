@@ -4,8 +4,8 @@ Content-Type: application/json
 {
   "userId": "user-001",
   "productId": "product-3",
-  "quantity": 5,
-  "totalAmount": 6000
+  "quantity": 10,
+  "totalAmount": 10000
 }
 ###
 POST http://localhost:8080/api/v1/orders/search
