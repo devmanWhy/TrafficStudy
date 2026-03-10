@@ -20,6 +20,10 @@ spring:
         heartbeat.interval.ms: 3000
         fetch.min.bytes: 1
         fetch.max.wait.ms: 500
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
 
     listener:
       ack-mode: manual

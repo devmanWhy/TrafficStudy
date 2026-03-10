@@ -2,8 +2,10 @@ package com.devy.products.eventHandler;
 
 import com.devy.common.event.EventInfo;
 import com.devy.common.event.order.OrderPlacedEvent;
+import com.devy.common.event.product.InventoryReservedEvent;
 import com.devy.products.domain.ProcessedEvent;
 import com.devy.products.repository.jpa.ProcessedEventRepository;
+import com.devy.products.repository.message.ProductEventMessageRepository;
 import com.devy.products.service.ProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,11 +27,13 @@ public class OrderEventHandler {
     private final ObjectMapper objectMapper;
     private final ProductService productService;
     private final ProcessedEventRepository processedEventRepository;
+    private final ProductEventMessageRepository productEventMessageRepository;
 
-    public OrderEventHandler(ObjectMapper objectMapper, ProductService productService, ProcessedEventRepository processedEventRepository) {
+    public OrderEventHandler(ObjectMapper objectMapper, ProductService productService, ProcessedEventRepository processedEventRepository, ProductEventMessageRepository productEventMessageRepository) {
         this.objectMapper = objectMapper;
         this.productService = productService;
         this.processedEventRepository = processedEventRepository;
+        this.productEventMessageRepository = productEventMessageRepository;
     }
 
     @KafkaListener(topics = {EventInfo.ORDERS.ORDER_EVENT_TOPIC})
@@ -44,13 +48,22 @@ public class OrderEventHandler {
         if (existEventOptional.isEmpty()) {
 
             if (ORDER_PLACED_EVENT_CLASS.getName().equals(eventType.asString())) {
-                OrderPlacedEvent orderPlacedEvent = objectMapper.readValue(message, ORDER_PLACED_EVENT_CLASS);
-                productService.holdProduct(orderPlacedEvent.getProductId(), orderPlacedEvent.getQuantity());
-                log.info("OrderPlacedEvent: {}", orderPlacedEvent);
+                throw new RuntimeException("OrderPlacedEvent is not supported");
+//                OrderPlacedEvent orderPlacedEvent = objectMapper.readValue(message, ORDER_PLACED_EVENT_CLASS);
+//                productService.holdProduct(orderPlacedEvent.getProductId(), orderPlacedEvent.getQuantity());
+//                InventoryReservedEvent inventoryReservedEvent = new InventoryReservedEvent(
+//                        orderPlacedEvent.eventId,
+//                        orderPlacedEvent.getUserId(),
+//                        orderPlacedEvent.getProductId(),
+//                        orderPlacedEvent.getQuantity(),
+//                        orderPlacedEvent.getTotalAmount()
+//                );
+//                productEventMessageRepository.publish(inventoryReservedEvent);
+//                log.info("OrderPlacedEvent: {}", orderPlacedEvent);
             }
 
             processedEventRepository.save(new ProcessedEvent(
-                    "product-"+eventId.asString(),
+                    "product-" + eventId.asString(),
                     eventType.asString(),
                     message
             ));

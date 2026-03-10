@@ -2,10 +2,10 @@ package com.devy.common.event.order;
 
 public class OrderPlacedEvent extends OrderEvent {
 
-    String userId;
-    String productId;
-    int quantity;
-    long totalAmount;
+    private String userId;
+    private String productId;
+    private int quantity;
+    private long totalAmount;
 
     public OrderPlacedEvent(String eventId, String userId, String productId, int quantity, long totalAmount) {
         super(eventId, OrderPlacedEvent.class.getName());
@@ -18,6 +18,15 @@ public class OrderPlacedEvent extends OrderEvent {
     public OrderPlacedEvent() {
         super();
     }
+
+    public OrderPlacedEvent(String userId, String productId, int quantity, long totalAmount) {
+        super();
+        this.userId = userId;
+        this.productId = productId;
+        this.quantity = quantity;
+        this.totalAmount = totalAmount;
+    }
+
 
     public String getUserId() {
         return userId;
