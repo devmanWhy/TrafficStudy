@@ -80,8 +80,21 @@ public class OrderServiceImpl implements OrderService {
                 searchProductInfoResponseDTO.price(),
                 existsOrders.getQuantity(),
                 searchPaymentInfoResponseDTO.amount(),
+                existsOrders.getOrderStatus(),
                 existsOrders.getOrderAt(),
                 searchPaymentInfoResponseDTO.paidAt()
         );
     }
+
+    @Override
+    public void cancelOrder(String eventId) {
+        Optional<Orders> existsOrderOptional = orderRepository.findById(eventId);
+        if (existsOrderOptional.isEmpty()) {
+            return;
+        }
+        Orders existsOrders = existsOrderOptional.get();
+        existsOrders.cancel();
+        orderRepository.save(existsOrders);
+    }
+
 }

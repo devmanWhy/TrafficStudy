@@ -69,4 +69,15 @@ public class ProductServiceImpl implements ProductService {
         }
         return null;
     }
+
+    @Override
+    public void releaseInventory(String productId, int quantity) {
+        Optional<Product> existProductsOptional = productRepository.findById(productId);
+        if (existProductsOptional.isEmpty()) return;
+        Product existProduct = existProductsOptional.get();
+        Inventory existInventory = inventoryRepository.findByProductsId(existProduct.getProductsId()).get();
+        existInventory.release(quantity);
+        inventoryRepository.save(existInventory);
+        log.info("Inventory is released : {}", existInventory);
+    }
 }

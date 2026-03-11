@@ -27,7 +27,16 @@ public class PaymentsRestRepository implements PaymentsRepository {
             put("orderId", orderId);
             put("userId", userId);
         }}).retrieve();
-        return retrieve.body(SearchPaymentInfoResponseDTO.class);
+        SearchPaymentInfoResponseDTO body = retrieve.body(SearchPaymentInfoResponseDTO.class);
+        if(body == null) {
+            return new SearchPaymentInfoResponseDTO(
+                    orderId,
+                    0,
+                    null
+            );
+        }
+
+        return body;
     }
 
     public SearchPaymentInfoResponseDTO fallbackSearchPaymentInfo(String orderId, String userId, Throwable throwable) {

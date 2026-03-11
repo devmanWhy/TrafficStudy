@@ -7,4 +7,6 @@ import com.devy.orders.controller.response.SearchOrderInfoResponseDTO;
 public interface OrderService {
     public String placeOrder(PlaceOrderRequestDTO request);
     public SearchOrderInfoResponseDTO searchOrder(SearchOrderInfoRequestDTO request);
+
+    public void cancelOrder(String eventId);
 }

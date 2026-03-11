@@ -6,11 +6,33 @@ spring:
     import: classpath:configs/circuit.yml, classpath:configs/ratelimiter.yml
   kafka:
     bootstrap-servers: localhost:19092,localhost:19093,localhost:19094
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      group-id: traffic-study-group-orders
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      properties:
+        spring.json.trusted.packages: "*"
+        max.poll.records: 500
+        max.poll.interval.ms: 300000
+        session.timeout.ms: 30000
+        heartbeat.interval.ms: 3000
+        fetch.min.bytes: 1
+        fetch.max.wait.ms: 500
+
+    listener:
+      ack-mode: manual
+      concurrency: 3
+
     # Producer 설정
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
       acks: all
+
+
+
   # MySQL 설정
   datasource:
     url: jdbc:mysql://localhost:13306/traffic_study?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true

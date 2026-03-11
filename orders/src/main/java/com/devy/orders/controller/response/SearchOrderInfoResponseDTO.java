@@ -1,5 +1,7 @@
 package com.devy.orders.controller.response;
 
+import com.devy.orders.domain.values.OrderStatus;
+
 import java.time.ZonedDateTime;
 
 public record SearchOrderInfoResponseDTO(
@@ -10,6 +12,7 @@ public record SearchOrderInfoResponseDTO(
         int productPrice,
         int productQuantity,
         long paymentAmount,
+        OrderStatus orderStatus,
         ZonedDateTime orderedAt,
         ZonedDateTime paidAt
 ) {

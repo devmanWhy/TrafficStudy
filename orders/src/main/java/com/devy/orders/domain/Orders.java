@@ -1,6 +1,8 @@
 package com.devy.orders.domain;
 
+import com.devy.orders.domain.values.OrderStatus;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 
 import java.time.ZonedDateTime;
@@ -15,21 +17,25 @@ public class Orders {
     private int quantity;
     private long totalAmount;
     private ZonedDateTime orderAt;
+    @Enumerated(value = jakarta.persistence.EnumType.STRING)
+    private OrderStatus orderStatus;
+
 
     public Orders() {
     }
 
     public Orders(String orderId, String userId, String productsId, int quantity, long totalAmount) {
-        this(orderId, userId, productsId, quantity, totalAmount, ZonedDateTime.now());
+        this(orderId, userId, productsId, quantity, totalAmount, ZonedDateTime.now(), OrderStatus.PENDING);
     }
 
-    public Orders(String orderId, String userId, String productsId, int quantity, long totalAmount, ZonedDateTime orderAt) {
+    public Orders(String orderId, String userId, String productsId, int quantity, long totalAmount, ZonedDateTime orderAt, OrderStatus orderStatus) {
         this.orderId = orderId;
         this.userId = userId;
         this.productsId = productsId;
         this.quantity = quantity;
         this.totalAmount = totalAmount;
         this.orderAt = orderAt;
+        this.orderStatus = orderStatus;
     }
 
     public String getOrderId() {
@@ -54,6 +60,14 @@ public class Orders {
 
     public ZonedDateTime getOrderAt() {
         return orderAt;
+    }
+
+    public OrderStatus getOrderStatus() {
+        return orderStatus;
+    }
+
+    public void cancel() {
+        this.orderStatus = OrderStatus.CANCELLED;
     }
 
     @Override

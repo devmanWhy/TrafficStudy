@@ -1,7 +1,8 @@
 package com.devy.products.eventHandler;
 
 import com.devy.common.event.EventInfo;
-import com.devy.common.event.order.OrderPlacedEvent;
+import com.devy.common.event.payment.PaymentFailedEvent;
+import com.devy.common.event.product.InventoryReleasedEvent;
 import com.devy.common.event.product.InventoryReservedEvent;
 import com.devy.products.domain.ProcessedEvent;
 import com.devy.products.repository.jpa.ProcessedEventRepository;
@@ -17,11 +18,10 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.Optional;
 
-import static com.devy.common.event.EventInfo.ORDERS.ORDER_PLACED_EVENT_CLASS;
+import static com.devy.common.event.EventInfo.PAYMENTS.PAYMENT_FAILED_EVENT_CLASS;
 
 @Component
-public class OrderEventHandler {
-
+public class PaymentEventHandler {
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
     private final ObjectMapper objectMapper;
@@ -29,15 +29,15 @@ public class OrderEventHandler {
     private final ProcessedEventRepository processedEventRepository;
     private final ProductEventMessageRepository productEventMessageRepository;
 
-    public OrderEventHandler(ObjectMapper objectMapper, ProductService productService, ProcessedEventRepository processedEventRepository, ProductEventMessageRepository productEventMessageRepository) {
+    public PaymentEventHandler(ObjectMapper objectMapper, ProductService productService, ProcessedEventRepository processedEventRepository, ProductEventMessageRepository productEventMessageRepository) {
         this.objectMapper = objectMapper;
         this.productService = productService;
         this.processedEventRepository = processedEventRepository;
         this.productEventMessageRepository = productEventMessageRepository;
     }
 
-    @KafkaListener(topics = {EventInfo.ORDERS.ORDER_EVENT_TOPIC})
-    public void handleOrderEvent(String message, Acknowledgment acknowledgment) {
+    @KafkaListener(topics = {EventInfo.PAYMENTS.PAYMENT_EVENT_TOPIC})
+    public void handlePaymentEvent(String message, Acknowledgment acknowledgment) {
         JsonNode jsonNode = objectMapper.readTree(message);
         JsonNode eventId = jsonNode.get("eventId");
         JsonNode eventType = jsonNode.get("eventType");
@@ -46,19 +46,20 @@ public class OrderEventHandler {
                         "product-" + eventId.asString(), eventType.asString())
         );
         if (existEventOptional.isEmpty()) {
+            if (PAYMENT_FAILED_EVENT_CLASS.getName().equals(eventType.asString())) {
+                PaymentFailedEvent paymentFailedEvent = objectMapper.readValue(message, PAYMENT_FAILED_EVENT_CLASS);
 
-            if (ORDER_PLACED_EVENT_CLASS.getName().equals(eventType.asString())) {
-                OrderPlacedEvent orderPlacedEvent = objectMapper.readValue(message, ORDER_PLACED_EVENT_CLASS);
-                productService.holdProduct(orderPlacedEvent.getProductId(), orderPlacedEvent.getQuantity());
-                InventoryReservedEvent inventoryReservedEvent = new InventoryReservedEvent(
-                        orderPlacedEvent.eventId,
-                        orderPlacedEvent.getUserId(),
-                        orderPlacedEvent.getProductId(),
-                        orderPlacedEvent.getQuantity(),
-                        orderPlacedEvent.getTotalAmount()
+                productService.releaseInventory(paymentFailedEvent.getProductId(), paymentFailedEvent.getQuantity());
+
+                InventoryReleasedEvent inventoryReleasedEvent = new InventoryReleasedEvent(
+                        paymentFailedEvent.getEventId(),
+                        paymentFailedEvent.getUserId(),
+                        paymentFailedEvent.getProductId(),
+                        paymentFailedEvent.getQuantity(),
+                        paymentFailedEvent.getTotalAmount()
                 );
-                productEventMessageRepository.publish(inventoryReservedEvent);
-                log.info("OrderPlacedEvent: {}", orderPlacedEvent);
+                productEventMessageRepository.publish(inventoryReleasedEvent);
+                log.info("PaymentFailedEvent: {}", paymentFailedEvent);
             }
 
             processedEventRepository.save(new ProcessedEvent(

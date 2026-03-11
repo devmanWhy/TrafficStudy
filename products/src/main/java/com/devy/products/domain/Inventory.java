@@ -32,6 +32,11 @@ public class Inventory {
         return false;
     }
 
+    public boolean release(int quantity) {
+        this.quantity += quantity;
+        return true;
+    }
+
     public String getInventoryId() {
         return inventoryId;
     }

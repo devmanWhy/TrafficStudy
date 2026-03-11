@@ -3,16 +3,17 @@ Content-Type: application/json
 
 {
   "userId": "user-001",
-  "productId": "product-3",
-  "quantity": 10,
+  "productId": "product-1",
+  "quantity": 20,
   "totalAmount": 10000
 }
+
 ###
 POST http://localhost:8080/api/v1/orders/search
 Content-Type: application/json
 
 {
   "userId": "user-001",
-"orderId": "639c4981b5b842c29726fd8d766e2d55"
+  "orderId": "8f64347ec5b04fc6a4ffa0d63e70e64a"
 }
 

@@ -1,4 +1,4 @@
-package com.devy.payments.repository;
+package com.devy.payments.repository.jpa;
 
 import com.devy.payments.domain.Payment;
 import org.springframework.data.jpa.repository.JpaRepository;
