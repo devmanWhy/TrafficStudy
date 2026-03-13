@@ -1,16 +1,16 @@
-package com.devy.common.event.payment;
+package com.devy.common.event.order.command;
 
-public class PaymentFailedEvent extends PaymentEvent {
+public class CancelOrderCommand extends OrderCommand {
     private String orderId;
     private String userId;
 
-    public PaymentFailedEvent(String eventId, String orderId, String userId) {
-        super(eventId, PaymentFailedEvent.class.getName());
+    public CancelOrderCommand(String orderId, String userId) {
+        super(orderId, CancelOrderCommand.class.getName());
         this.orderId = orderId;
         this.userId = userId;
     }
 
-    public PaymentFailedEvent() {
+    public CancelOrderCommand() {
         super();
     }
 

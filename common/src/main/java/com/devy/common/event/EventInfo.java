@@ -1,25 +1,48 @@
 package com.devy.common.event;
 
 import com.devy.common.event.order.OrderPlacedEvent;
+import com.devy.common.event.order.command.CancelOrderCommand;
 import com.devy.common.event.payment.PaymentFailedEvent;
+import com.devy.common.event.payment.command.DoPaymentCommand;
 import com.devy.common.event.product.InventoryReleasedEvent;
 import com.devy.common.event.product.InventoryReservedEvent;
+import com.devy.common.event.product.command.ReleaseInventoryCommand;
+import com.devy.common.event.product.command.ReserveInventoryCommand;
 
 public class EventInfo {
     public static class ORDERS {
+        // Command
+        public static final String ORDER_COMMAND_TOPIC = "order-commands";
+        public static final Class<CancelOrderCommand> CANCEL_ORDER_COMMAND_CLASS = CancelOrderCommand.class;
+
+        // Result
         public static final String ORDER_EVENT_TOPIC = "order-events";
         public static final Class<OrderPlacedEvent> ORDER_PLACED_EVENT_CLASS = OrderPlacedEvent.class;
 
     }
 
     public static class PRODUCTS {
+        // Command
+        public static final Class<ReleaseInventoryCommand> RELEASE_INVENTORY_COMMAND_CLASS = ReleaseInventoryCommand.class;
+        public static final String PRODUCT_COMMAND_TOPIC = "product-commands";
+        public static final Class<ReserveInventoryCommand> RESERVE_INVENTORY_COMMAND_CLASS = ReserveInventoryCommand.class;
+
+
+        // Result
         public static final String PRODUCT_EVENT_TOPIC = "product-events";
         public static final Class<InventoryReservedEvent> INVENTORY_RESERVED_EVENT_CLASS = InventoryReservedEvent.class;
         public static final Class<InventoryReleasedEvent> INVENTORY_RELEASED_EVENT_CLASS = InventoryReleasedEvent.class;
+
     }
 
     public static class PAYMENTS {
+        // Command
+        public static final String PAYMENT_COMMAND_TOPIC = "payment-commands";
+        public static final Class<DoPaymentCommand> DO_PAYMENT_COMMAND_CLASS = DoPaymentCommand.class;
+
+        // Result
         public static final String PAYMENT_EVENT_TOPIC = "payment-events";
         public static final Class<PaymentFailedEvent> PAYMENT_FAILED_EVENT_CLASS = PaymentFailedEvent.class;
+
     }
 }
