@@ -45,12 +45,12 @@ public class PaymentCommandHandler {
                         doPaymentCommand.getTotalAmount()
                 );
                 log.info("ReserveInventoryCommand: {}", doPaymentCommand);
-                PaymentSucceedEvent paymentSucceedEvent = new PaymentSucceedEvent(
-                        doPaymentCommand.getOrderId(),
-                        doPaymentCommand.getUserId()
-                );
-                kafkaTemplate.send(EventInfo.PAYMENTS.PAYMENT_EVENT_TOPIC,
-                        objectMapper.writeValueAsString(paymentSucceedEvent));
+//                PaymentSucceedEvent paymentSucceedEvent = new PaymentSucceedEvent(
+//                        doPaymentCommand.getOrderId(),
+//                        doPaymentCommand.getUserId()
+//                );
+//                kafkaTemplate.send(EventInfo.PAYMENTS.PAYMENT_EVENT_TOPIC,
+//                        objectMapper.writeValueAsString(paymentSucceedEvent));
             } catch (Exception e) {
                 log.error("Failed to pay inventoryReservedEvent: {}", message, e);
                 PaymentFailedEvent paymentFailedEvent = new PaymentFailedEvent(

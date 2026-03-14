@@ -41,15 +41,15 @@ public class ProductCommandHandler {
         if (RESERVE_INVENTORY_COMMAND_CLASS.getName().equals(eventType.asString())) {
             try {
                 ReserveInventoryCommand reserveInventoryCommand = objectMapper.treeToValue(jsonNode, RESERVE_INVENTORY_COMMAND_CLASS);
-                productService.holdProduct(reserveInventoryCommand.getProductId(), reserveInventoryCommand.getQuantity());
+                productService.holdProduct(reserveInventoryCommand.getOrderId(), reserveInventoryCommand.getProductId(), reserveInventoryCommand.getQuantity());
                 log.info("ReserveInventoryCommand: {}", reserveInventoryCommand);
-                InventoryReservedEvent inventoryReservedEvent = new InventoryReservedEvent(
-                        reserveInventoryCommand.getOrderId(),
-                        reserveInventoryCommand.getProductId(),
-                        reserveInventoryCommand.getQuantity()
-                );
-                kafkaTemplate.send(EventInfo.PRODUCTS.PRODUCT_EVENT_TOPIC,
-                        objectMapper.writeValueAsString(inventoryReservedEvent));
+//                InventoryReservedEvent inventoryReservedEvent = new InventoryReservedEvent(
+//                        reserveInventoryCommand.getOrderId(),
+//                        reserveInventoryCommand.getProductId(),
+//                        reserveInventoryCommand.getQuantity()
+//                );
+//                kafkaTemplate.send(EventInfo.PRODUCTS.PRODUCT_EVENT_TOPIC,
+//                        objectMapper.writeValueAsString(inventoryReservedEvent));
             } catch (Exception e) {
 
                 log.error("Failed reserveInventoryCommand: {}", message, e);
@@ -59,15 +59,15 @@ public class ProductCommandHandler {
         if (RELEASE_INVENTORY_COMMAND_CLASS.getName().equals(eventType.asString())) {
             try {
                 ReleaseInventoryCommand releaseInventoryCommand = objectMapper.treeToValue(jsonNode, RELEASE_INVENTORY_COMMAND_CLASS);
-                productService.releaseInventory(releaseInventoryCommand.getProductId(), releaseInventoryCommand.getQuantity());
+                productService.releaseInventory(releaseInventoryCommand.getOrderId(), releaseInventoryCommand.getProductId(), releaseInventoryCommand.getQuantity());
                 log.info("ReleaseInventoryCommand: {}", releaseInventoryCommand);
-                InventoryReleasedEvent inventoryReleasedEvent = new InventoryReleasedEvent(
-                        releaseInventoryCommand.getOrderId(),
-                        releaseInventoryCommand.getProductId(),
-                        releaseInventoryCommand.getQuantity()
-                );
-                kafkaTemplate.send(EventInfo.PRODUCTS.PRODUCT_EVENT_TOPIC,
-                        objectMapper.writeValueAsString(inventoryReleasedEvent));
+//                InventoryReleasedEvent inventoryReleasedEvent = new InventoryReleasedEvent(
+//                        releaseInventoryCommand.getOrderId(),
+//                        releaseInventoryCommand.getProductId(),
+//                        releaseInventoryCommand.getQuantity()
+//                );
+//                kafkaTemplate.send(EventInfo.PRODUCTS.PRODUCT_EVENT_TOPIC,
+//                        objectMapper.writeValueAsString(inventoryReleasedEvent));
             } catch (Exception e) {
 
                 log.error("Failed to releaseInventoryCommand: {}", message, e);

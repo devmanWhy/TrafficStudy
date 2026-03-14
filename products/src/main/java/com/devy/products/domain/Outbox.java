@@ -1,4 +1,4 @@
-package com.devy.orders.domain;
+package com.devy.products.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

@@ -1,17 +1,14 @@
-package com.devy.orders.scheduler;
+package com.devy.payments.scheduler;
 
 import com.devy.common.event.EventInfo;
-import com.devy.common.event.order.OrderPlacedEvent;
-import com.devy.orders.domain.Outbox;
-import com.devy.orders.repository.db.OutboxRepository;
-import com.devy.orders.repository.message.OrderEventMessageRepository;
+import com.devy.payments.domain.Outbox;
+import com.devy.payments.repository.jpa.OutboxRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
@@ -22,12 +19,10 @@ public class OutboxScheduler {
 
     private final OutboxRepository outboxRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
-    private final ObjectMapper objectMapper;
 
-    public OutboxScheduler(OutboxRepository outboxRepository, KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper) {
+    public OutboxScheduler(OutboxRepository outboxRepository, KafkaTemplate<String, String> kafkaTemplate) {
         this.outboxRepository = outboxRepository;
         this.kafkaTemplate = kafkaTemplate;
-        this.objectMapper = objectMapper;
     }
 
     @Transactional
@@ -38,16 +33,20 @@ public class OutboxScheduler {
         // 데이터 순회하면서
         notPublishedEvents.forEach(notPublishedEvent -> {
             // 메시지 발행
-            if (isOrderEvent(notPublishedEvent.getEventType())) {
-                log.info("Processing order event: {}", notPublishedEvent);
-                kafkaTemplate.send(EventInfo.ORDERS.ORDER_EVENT_TOPIC, notPublishedEvent.getEventPayload());
+            if (isPaymentEvent(notPublishedEvent.getEventType())) {
+                log.info("Processing Payment event: {}", notPublishedEvent);
+                kafkaTemplate.send(EventInfo.PAYMENTS.PAYMENT_EVENT_TOPIC, notPublishedEvent.getEventPayload());
                 // 상태 success 로 해주기
                 notPublishedEvent.complete();
             }
         });
+
     }
 
-    private boolean isOrderEvent(String eventType) {
-        return EventInfo.ORDERS.ORDER_PLACED_EVENT_CLASS.getName().equals(eventType);
+    private boolean isPaymentEvent(String eventType) {
+        return EventInfo.PAYMENTS.PAYMENT_SUCCEED_EVENT_CLASS.getName().equals(eventType)
+                || EventInfo.PAYMENTS.PAYMENT_FAILED_EVENT_CLASS.getName().equals(eventType);
+
+
     }
 }

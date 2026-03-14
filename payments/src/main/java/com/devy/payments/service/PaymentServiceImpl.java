@@ -1,12 +1,17 @@
 package com.devy.payments.service;
 
+import com.devy.common.event.payment.PaymentFailedEvent;
+import com.devy.common.event.payment.PaymentSucceedEvent;
 import com.devy.payments.controller.request.SearchPaymentInfoRequestDTO;
 import com.devy.payments.controller.response.SearchPaymentInfoResponseDTO;
+import com.devy.payments.domain.Outbox;
 import com.devy.payments.domain.Payment;
+import com.devy.payments.repository.jpa.OutboxRepository;
 import com.devy.payments.repository.jpa.PaymentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.Optional;
 
@@ -15,23 +20,39 @@ public class PaymentServiceImpl implements PaymentService {
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
     private final PaymentRepository paymentRepository;
+    private final OutboxRepository outboxRepository;
+    private final ObjectMapper objectMapper;
 
-    public PaymentServiceImpl(PaymentRepository paymentRepository) {
+    public PaymentServiceImpl(PaymentRepository paymentRepository, OutboxRepository outboxRepository, ObjectMapper objectMapper) {
         this.paymentRepository = paymentRepository;
+        this.outboxRepository = outboxRepository;
+        this.objectMapper = objectMapper;
     }
 
     @Override
     public boolean pay(String orderId, String userId, long amount) {
         try {
-            Thread.sleep(10_000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            log.info("Paying order: {} for amount: {}", orderId, amount);
+            String paymentId = java.util.UUID.randomUUID().toString();
+            PaymentSucceedEvent paymentSucceedEvent = new PaymentSucceedEvent(orderId, userId);
+            paymentRepository.save(new Payment(paymentId, orderId, userId, amount));
+            outboxRepository.save(new Outbox(
+                    orderId,
+                    paymentSucceedEvent.getClass().getName(),
+                    objectMapper.writeValueAsString(paymentSucceedEvent)
+            ));
+            return true;
+        } catch (Exception e) {
+            PaymentFailedEvent paymentFailedEvent = new PaymentFailedEvent(orderId, userId);
+            outboxRepository.save(new Outbox(
+                    orderId,
+                    paymentFailedEvent.getClass().getName(),
+                    objectMapper.writeValueAsString(paymentFailedEvent)
+            ));
+            log.error("Failed to pay order: {} for amount: {}", orderId, amount, e);
         }
-        throw new RuntimeException("Payment Failed for Order: " + orderId + " for user: " + userId + "");
-//        log.info("Paying order: {} for amount: {}", orderId, amount);
-//        String paymentId = java.util.UUID.randomUUID().toString();
-//        paymentRepository.save(new Payment(paymentId, orderId, userId, amount));
-//        return true;
+
+        return false;
     }
 
     @Override

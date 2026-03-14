@@ -1,4 +1,4 @@
-package com.devy.orders.domain;
+package com.devy.payments.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -85,3 +85,4 @@ public class Outbox {
         }
     }
 }
+
