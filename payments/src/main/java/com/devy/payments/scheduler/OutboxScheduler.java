@@ -34,19 +34,17 @@ public class OutboxScheduler {
         notPublishedEvents.forEach(notPublishedEvent -> {
             // 메시지 발행
             if (isPaymentEvent(notPublishedEvent.getEventType())) {
-                log.info("Processing Payment event: {}", notPublishedEvent);
+                log.info("Processing payment event: {}", notPublishedEvent);
                 kafkaTemplate.send(EventInfo.PAYMENTS.PAYMENT_EVENT_TOPIC, notPublishedEvent.getEventPayload());
                 // 상태 success 로 해주기
                 notPublishedEvent.complete();
             }
         });
-
     }
 
     private boolean isPaymentEvent(String eventType) {
         return EventInfo.PAYMENTS.PAYMENT_SUCCEED_EVENT_CLASS.getName().equals(eventType)
-                || EventInfo.PAYMENTS.PAYMENT_FAILED_EVENT_CLASS.getName().equals(eventType);
-
-
+                || EventInfo.PAYMENTS.PAYMENT_FAILED_EVENT_CLASS.getName().equals(eventType)
+                ;
     }
 }

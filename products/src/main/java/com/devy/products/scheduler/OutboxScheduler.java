@@ -34,19 +34,17 @@ public class OutboxScheduler {
         notPublishedEvents.forEach(notPublishedEvent -> {
             // 메시지 발행
             if (isProductEvent(notPublishedEvent.getEventType())) {
-                log.info("Processing Product event: {}", notPublishedEvent);
+                log.info("Processing product event: {}", notPublishedEvent);
                 kafkaTemplate.send(EventInfo.PRODUCTS.PRODUCT_EVENT_TOPIC, notPublishedEvent.getEventPayload());
                 // 상태 success 로 해주기
                 notPublishedEvent.complete();
             }
         });
-
     }
 
     private boolean isProductEvent(String eventType) {
-        return EventInfo.PRODUCTS.INVENTORY_RESERVED_EVENT_CLASS.getName().equals(eventType)
-                || EventInfo.PRODUCTS.INVENTORY_RELEASED_EVENT_CLASS.getName().equals(eventType);
-
-
+        return EventInfo.PRODUCTS.INVENTORY_RELEASED_EVENT_CLASS.getName().equals(eventType)
+                || EventInfo.PRODUCTS.INVENTORY_RESERVED_EVENT_CLASS.getName().equals(eventType)
+                ;
     }
 }

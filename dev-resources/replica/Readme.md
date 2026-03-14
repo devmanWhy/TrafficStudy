@@ -131,6 +131,7 @@ GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'study_replica'@'%';
 SET SQL_LOG_BIN = 1;
 FLUSH PRIVILEGES;
 
+# DUMP 파일 Secondary 에 실행
 
 # Secondary 에서 ROOT 권한으로 실행
 SET GLOBAL read_only = OFF;

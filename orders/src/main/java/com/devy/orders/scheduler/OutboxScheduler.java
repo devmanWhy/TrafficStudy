@@ -1,10 +1,8 @@
 package com.devy.orders.scheduler;
 
 import com.devy.common.event.EventInfo;
-import com.devy.common.event.order.OrderPlacedEvent;
 import com.devy.orders.domain.Outbox;
-import com.devy.orders.repository.db.OutboxRepository;
-import com.devy.orders.repository.message.OrderEventMessageRepository;
+import com.devy.orders.repository.db.command.OutboxCommandRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,11 +18,11 @@ public class OutboxScheduler {
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
-    private final OutboxRepository outboxRepository;
+    private final OutboxCommandRepository outboxRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
-    public OutboxScheduler(OutboxRepository outboxRepository, KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper) {
+    public OutboxScheduler(OutboxCommandRepository outboxRepository, KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper) {
         this.outboxRepository = outboxRepository;
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = objectMapper;

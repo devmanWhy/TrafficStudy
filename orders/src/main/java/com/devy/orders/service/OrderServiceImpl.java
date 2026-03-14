@@ -10,8 +10,9 @@ import com.devy.orders.repository.api.PaymentsRepository;
 import com.devy.orders.repository.api.ProductsRepository;
 import com.devy.orders.repository.api.response.SearchPaymentInfoResponseDTO;
 import com.devy.orders.repository.api.response.SearchProductInfoResponseDTO;
-import com.devy.orders.repository.db.OrderRepository;
-import com.devy.orders.repository.db.OutboxRepository;
+import com.devy.orders.repository.db.command.OrderCommandRepository;
+import com.devy.orders.repository.db.command.OutboxCommandRepository;
+import com.devy.orders.repository.db.query.OrderQueryRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -23,29 +24,29 @@ import java.util.UUID;
 @Service
 public class OrderServiceImpl implements OrderService {
 
-    private final OrderRepository orderRepository;
+    private final OrderCommandRepository orderCommandRepository;
+    private final OrderQueryRepository orderQueryRepository;
     private final ProductsRepository productsRepository;
     private final PaymentsRepository paymentsRepository;
-    private final OutboxRepository outboxRepository;
+    private final OutboxCommandRepository outboxRepository;
     private final ObjectMapper objectMapper;
 
-    public OrderServiceImpl(
-            OrderRepository orderRepository,
-            @Qualifier("productsRestRepository") ProductsRepository productsRepository,
-            PaymentsRepository paymentsRepository, OutboxRepository outboxRepository, ObjectMapper objectMapper
-    ) {
-        this.orderRepository = orderRepository;
+    public OrderServiceImpl(OrderCommandRepository orderCommandRepository, OrderQueryRepository orderQueryRepository,
+                            @Qualifier("productsRestRepository") ProductsRepository productsRepository, PaymentsRepository paymentsRepository, OutboxCommandRepository outboxRepository, ObjectMapper objectMapper) {
+        this.orderCommandRepository = orderCommandRepository;
+        this.orderQueryRepository = orderQueryRepository;
         this.productsRepository = productsRepository;
         this.paymentsRepository = paymentsRepository;
         this.outboxRepository = outboxRepository;
         this.objectMapper = objectMapper;
     }
 
+
     @Transactional
     @Override
     public String placeOrder(PlaceOrderRequestDTO request) {
         String orderId = UUID.randomUUID().toString().replace("-", "");
-        orderRepository.save(new Orders(orderId, request.userId(), request.productId(), request.quantity(), request.totalAmount()));
+        orderCommandRepository.save(new Orders(orderId, request.userId(), request.productId(), request.quantity(), request.totalAmount()));
         OrderPlacedEvent orderPlacedEvent = new OrderPlacedEvent(
                 orderId,
                 request.userId(),
@@ -65,7 +66,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public SearchOrderInfoResponseDTO searchOrder(SearchOrderInfoRequestDTO request) {
-        Optional<Orders> existsOrderOptional = orderRepository.findById(request.orderId());
+        Optional<Orders> existsOrderOptional = orderQueryRepository.findById(request.orderId());
         if (existsOrderOptional.isEmpty()) {
             return null;
         }
@@ -88,24 +89,24 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void cancelOrder(String eventId) {
-        Optional<Orders> existsOrderOptional = orderRepository.findById(eventId);
+        Optional<Orders> existsOrderOptional = orderCommandRepository.findById(eventId);
         if (existsOrderOptional.isEmpty()) {
             return;
         }
         Orders existsOrders = existsOrderOptional.get();
         existsOrders.cancel();
-        orderRepository.save(existsOrders);
+        orderCommandRepository.save(existsOrders);
     }
 
     @Override
     public void confirmOrder(String eventId) {
-        Optional<Orders> existsOrderOptional = orderRepository.findById(eventId);
+        Optional<Orders> existsOrderOptional = orderCommandRepository.findById(eventId);
         if (existsOrderOptional.isEmpty()) {
             return;
         }
         Orders existsOrders = existsOrderOptional.get();
         existsOrders.confirm();
-        orderRepository.save(existsOrders);
+        orderCommandRepository.save(existsOrders);
     }
 
 }

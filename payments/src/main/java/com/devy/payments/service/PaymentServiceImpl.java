@@ -8,6 +8,7 @@ import com.devy.payments.domain.Outbox;
 import com.devy.payments.domain.Payment;
 import com.devy.payments.repository.jpa.OutboxRepository;
 import com.devy.payments.repository.jpa.PaymentRepository;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -29,9 +30,12 @@ public class PaymentServiceImpl implements PaymentService {
         this.objectMapper = objectMapper;
     }
 
+    @Transactional
     @Override
     public boolean pay(String orderId, String userId, long amount) {
         try {
+
+//            throw new RuntimeException("Payment failed");
             log.info("Paying order: {} for amount: {}", orderId, amount);
             String paymentId = java.util.UUID.randomUUID().toString();
             PaymentSucceedEvent paymentSucceedEvent = new PaymentSucceedEvent(orderId, userId);

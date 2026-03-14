@@ -35,20 +35,29 @@ spring:
 
   # MySQL 설정
   datasource:
-    url: jdbc:mysql://localhost:13306/traffic_study?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
-    username: study
-    password: traffic
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    hikari:
-      maximum-pool-size: 10
-      minimum-idle: 5
-      connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1800000
-      pool-name: TrafficStudy-HikariCP
+    primary:
+      url: jdbc:mysql://localhost:13306/traffic_study?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+      username: study
+      password: traffic
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      hikari:
+        pool-name: Primary-HikariCP
+        maximum-pool-size: 10
+        minimum-idle: 5
+        connection-timeout: 30000
+    secondary:
+      url: jdbc:mysql://localhost:13307/traffic_study?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+      username: study
+      password: traffic
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      hikari:
+        pool-name: Secondary-HikariCP
+        maximum-pool-size: 10
+        minimum-idle: 5
+        connection-timeout: 30000
   jpa:
     hibernate:
-      ddl-auto: update  # 운영: validate, 개발: update, 초기: create
+      ddl-auto: create  # 운영: validate, 개발: update, 초기: create
     show-sql: false
     properties:
       hibernate:

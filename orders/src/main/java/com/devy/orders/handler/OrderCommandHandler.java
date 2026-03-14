@@ -52,7 +52,7 @@ public class OrderCommandHandler {
             try {
                 ConfirmOrderCommand confirmOrderCommand = objectMapper.treeToValue(jsonNode, CONFIRM_ORDER_COMMAND_CLASS);
                 orderService.confirmOrder(confirmOrderCommand.getOrderId());
-                log.info("CancelOrderCommand: {}", confirmOrderCommand);
+                log.info("ConfirmOrderCommand: {}", confirmOrderCommand);
             } catch (Exception e) {
 
                 log.error("Failed to pay inventoryReservedEvent: {}", message, e);
