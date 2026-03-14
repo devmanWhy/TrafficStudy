@@ -5,6 +5,7 @@ import com.devy.common.event.BaseEvent;
 import com.devy.common.event.EventInfo;
 import com.devy.common.event.order.OrderPlacedEvent;
 import com.devy.common.event.order.command.CancelOrderCommand;
+import com.devy.common.event.order.command.ConfirmOrderCommand;
 import com.devy.common.event.payment.command.DoPaymentCommand;
 import com.devy.common.event.product.command.ReleaseInventoryCommand;
 import com.devy.common.event.product.command.ReserveInventoryCommand;
@@ -25,8 +26,9 @@ public class CommandManager {
     public void apply(BaseEvent event) {
         if (event.eventId.equals(orderId)) {
             processedEvents.add(event);
+        } else {
+            throw new RuntimeException("Event not for this order : eventId : " + event.eventId + " orderId : " + orderId + "");
         }
-        throw new RuntimeException("Event not for this order : eventId : " + event.eventId + " orderId : " + orderId + "");
     }
 
     public BaseCommand getCommand() {
@@ -62,6 +64,13 @@ public class CommandManager {
             );
         }
 
+        if (isPaymentSucceedEvent()) {
+            command = new ConfirmOrderCommand(
+                    orderPlacedEvent.eventId,
+                    orderPlacedEvent.getUserId()
+            );
+        }
+
         return command;
     }
 
@@ -79,6 +88,10 @@ public class CommandManager {
 
     private boolean isPaymentFailedEvent() {
         return processedEvents.getLast().eventType.equals(EventInfo.PAYMENTS.PAYMENT_FAILED_EVENT_CLASS.getName());
+    }
+
+    private boolean isPaymentSucceedEvent() {
+        return processedEvents.getLast().eventType.equals(EventInfo.PAYMENTS.PAYMENT_SUCCEED_EVENT_CLASS.getName());
     }
 
     private OrderPlacedEvent getOrderPlacedEvent() {

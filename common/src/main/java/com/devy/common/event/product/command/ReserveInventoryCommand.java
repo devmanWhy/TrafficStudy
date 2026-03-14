@@ -27,4 +27,13 @@ public class ReserveInventoryCommand extends ProductCommand {
     public int getQuantity() {
         return quantity;
     }
+
+    @Override
+    public String toString() {
+        return "ReserveInventoryCommand{" +
+                "orderId='" + orderId + '\'' +
+                ", productId='" + productId + '\'' +
+                ", quantity=" + quantity +
+                '}';
+    }
 }

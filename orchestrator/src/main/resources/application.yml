@@ -7,7 +7,7 @@ spring:
     consumer:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      group-id: traffic-study-group-orders
+      group-id: traffic-study-group-orchestrator
       auto-offset-reset: earliest
       enable-auto-commit: false
       properties:

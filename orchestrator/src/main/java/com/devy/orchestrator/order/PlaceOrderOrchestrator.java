@@ -5,6 +5,7 @@ import com.devy.common.event.BaseEvent;
 import com.devy.common.event.EventInfo;
 import com.devy.common.event.order.OrderPlacedEvent;
 import com.devy.common.event.payment.PaymentFailedEvent;
+import com.devy.common.event.payment.PaymentSucceedEvent;
 import com.devy.common.event.product.InventoryReleasedEvent;
 import com.devy.common.event.product.InventoryReservedEvent;
 import org.slf4j.Logger;
@@ -21,6 +22,7 @@ import java.util.Map;
 
 import static com.devy.common.event.EventInfo.ORDERS.ORDER_PLACED_EVENT_CLASS;
 import static com.devy.common.event.EventInfo.PAYMENTS.PAYMENT_FAILED_EVENT_CLASS;
+import static com.devy.common.event.EventInfo.PAYMENTS.PAYMENT_SUCCEED_EVENT_CLASS;
 import static com.devy.common.event.EventInfo.PRODUCTS.INVENTORY_RELEASED_EVENT_CLASS;
 import static com.devy.common.event.EventInfo.PRODUCTS.INVENTORY_RESERVED_EVENT_CLASS;
 
@@ -48,7 +50,6 @@ public class PlaceOrderOrchestrator {
             commandManagers.put(orderPlacedEvent.getOrderId(), new CommandManager(orderPlacedEvent.getOrderId()));
             kafkaTemplate.send(EventInfo.PRODUCTS.PRODUCT_COMMAND_TOPIC, objectMapper.writeValueAsString(getCommand(orderPlacedEvent)));
         }
-        log.info("Received message : {}", message);
         acknowledgment.acknowledge();
 
     }
@@ -59,8 +60,10 @@ public class PlaceOrderOrchestrator {
         String eventId = jsonNode.get("eventId").asString();
         JsonNode eventType = jsonNode.get("eventType");
         if (INVENTORY_RESERVED_EVENT_CLASS.getName().equals(eventType.asString())) {
+            // Event 를 받아서
             log.info("InventoryReservedEvent message : {}", message);
             InventoryReservedEvent inventoryReservedEvent = objectMapper.treeToValue(jsonNode, INVENTORY_RESERVED_EVENT_CLASS);
+            // Command 를 보낸다
             kafkaTemplate.send(EventInfo.PAYMENTS.PAYMENT_COMMAND_TOPIC, objectMapper.writeValueAsString(getCommand(inventoryReservedEvent)));
         }
         if (INVENTORY_RELEASED_EVENT_CLASS.getName().equals(eventType.asString())) {
@@ -78,6 +81,12 @@ public class PlaceOrderOrchestrator {
         JsonNode jsonNode = objectMapper.readTree(message);
         String eventId = jsonNode.get("eventId").asString();
         JsonNode eventType = jsonNode.get("eventType");
+        if (PAYMENT_SUCCEED_EVENT_CLASS.getName().equals(eventType.asString())) {
+            log.info("PaymentSucceedEvent message : {}", message);
+            PaymentSucceedEvent paymentSucceedEvent = objectMapper.treeToValue(jsonNode, PAYMENT_SUCCEED_EVENT_CLASS);
+            kafkaTemplate.send(EventInfo.ORDERS.ORDER_COMMAND_TOPIC, objectMapper.writeValueAsString(getCommand(paymentSucceedEvent)));
+        }
+
         if (PAYMENT_FAILED_EVENT_CLASS.getName().equals(eventType.asString())) {
             log.info("PaymentFailedEvent message : {}", message);
             PaymentFailedEvent paymentFailedEvent = objectMapper.treeToValue(jsonNode, PAYMENT_FAILED_EVENT_CLASS);

@@ -9,4 +9,5 @@ public interface OrderService {
     public SearchOrderInfoResponseDTO searchOrder(SearchOrderInfoRequestDTO request);
 
     public void cancelOrder(String eventId);
+    public void confirmOrder(String eventId);
 }

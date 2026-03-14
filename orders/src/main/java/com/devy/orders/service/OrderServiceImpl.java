@@ -97,4 +97,15 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.save(existsOrders);
     }
 
+    @Override
+    public void confirmOrder(String eventId) {
+        Optional<Orders> existsOrderOptional = orderRepository.findById(eventId);
+        if (existsOrderOptional.isEmpty()) {
+            return;
+        }
+        Orders existsOrders = existsOrderOptional.get();
+        existsOrders.confirm();
+        orderRepository.save(existsOrders);
+    }
+
 }

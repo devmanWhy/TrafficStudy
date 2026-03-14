@@ -1,16 +1,16 @@
 package com.devy.common.event.order.command;
 
-public class CancelOrderCommand extends OrderCommand {
+public class ConfirmOrderCommand extends OrderCommand {
     private String orderId;
     private String userId;
 
-    public CancelOrderCommand(String orderId, String userId) {
-        super(orderId, CancelOrderCommand.class.getName());
+    public ConfirmOrderCommand(String orderId, String userId) {
+        super(orderId, ConfirmOrderCommand.class.getName());
         this.orderId = orderId;
         this.userId = userId;
     }
 
-    public CancelOrderCommand() {
+    public ConfirmOrderCommand() {
         super();
     }
 

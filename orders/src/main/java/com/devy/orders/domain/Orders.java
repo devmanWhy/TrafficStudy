@@ -70,6 +70,10 @@ public class Orders {
         this.orderStatus = OrderStatus.CANCELLED;
     }
 
+    public void confirm() {
+        this.orderStatus = OrderStatus.COMPLETED;
+    }
+
     @Override
     public String toString() {
         return "Orders{" +
