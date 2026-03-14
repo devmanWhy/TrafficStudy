@@ -182,6 +182,27 @@ services:
       timeout: 5s
       retries: 5
 
+  mysql-secondary:
+    image: mysql:8.4
+    container_name: traffic-study-mysql-secondary
+    ports:
+      - "13307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: traffic
+      MYSQL_DATABASE: traffic_study
+      MYSQL_USER: study
+      MYSQL_PASSWORD: traffic
+      TZ: Asia/Seoul
+    volumes:
+      - ./mysql-secondary/data:/var/lib/mysql
+      - ./mysql-secondary/conf.d:/etc/mysql/conf.d
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    depends_on:
+      - mysql
+    restart: always
+
 networks:
   monitoring:
     driver: bridge
