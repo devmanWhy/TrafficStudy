@@ -203,6 +203,25 @@ services:
       - mysql
     restart: always
 
+  mongodb:
+    image: mongo:latest
+    container_name: traffic-study-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: traffic
+      MONGO_INITDB_DATABASE: traffic_study_order_history
+      TZ: Asia/Seoul
+    volumes:
+      - ./mongodb/data:/data/db
+    restart: always
+    healthcheck:
+      test: [ "CMD", "mongosh", "--host", "localhost", "--username", "root", "--password", "traffic", "--authenticationDatabase", "admin", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 networks:
   monitoring:
     driver: bridge
