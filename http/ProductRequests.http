@@ -14,3 +14,7 @@ Content-Type: application/json
   "productId": "productId-001",
   "quantity" : 100
 }
+###
+
+GET localhost:8081/api/v1/inventory/product-1
+Content-Type: application/json

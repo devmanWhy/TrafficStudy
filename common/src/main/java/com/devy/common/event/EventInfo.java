@@ -6,8 +6,10 @@ import com.devy.common.event.order.command.ConfirmOrderCommand;
 import com.devy.common.event.payment.PaymentFailedEvent;
 import com.devy.common.event.payment.PaymentSucceedEvent;
 import com.devy.common.event.payment.command.DoPaymentCommand;
+import com.devy.common.event.product.InventoryCreatedEvent;
 import com.devy.common.event.product.InventoryReleasedEvent;
 import com.devy.common.event.product.InventoryReservedEvent;
+import com.devy.common.event.product.command.CreateInventoryCommand;
 import com.devy.common.event.product.command.ReleaseInventoryCommand;
 import com.devy.common.event.product.command.ReserveInventoryCommand;
 
@@ -27,12 +29,14 @@ public class EventInfo {
     public static class PRODUCTS {
         // Command
         public static final String PRODUCT_COMMAND_TOPIC = "product-commands";
+        public static final Class<CreateInventoryCommand> CREATE_INVENTORY_COMMAND_CLASS = CreateInventoryCommand.class;
         public static final Class<ReserveInventoryCommand> RESERVE_INVENTORY_COMMAND_CLASS = ReserveInventoryCommand.class;
         public static final Class<ReleaseInventoryCommand> RELEASE_INVENTORY_COMMAND_CLASS = ReleaseInventoryCommand.class;
 
 
         // Result
         public static final String PRODUCT_EVENT_TOPIC = "product-events";
+        public static final Class<InventoryCreatedEvent> INVENTORY_CREATED_EVENT_CLASS = InventoryCreatedEvent.class;
         public static final Class<InventoryReservedEvent> INVENTORY_RESERVED_EVENT_CLASS = InventoryReservedEvent.class;
         public static final Class<InventoryReleasedEvent> INVENTORY_RELEASED_EVENT_CLASS = InventoryReleasedEvent.class;
 
