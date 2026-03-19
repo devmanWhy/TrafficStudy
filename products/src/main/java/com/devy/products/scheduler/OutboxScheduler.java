@@ -45,6 +45,7 @@ public class OutboxScheduler {
     private boolean isProductEvent(String eventType) {
         return EventInfo.PRODUCTS.INVENTORY_RELEASED_EVENT_CLASS.getName().equals(eventType)
                 || EventInfo.PRODUCTS.INVENTORY_RESERVED_EVENT_CLASS.getName().equals(eventType)
+                || EventInfo.PRODUCTS.INVENTORY_CREATED_EVENT_CLASS.getName().equals(eventType)
                 ;
     }
 }

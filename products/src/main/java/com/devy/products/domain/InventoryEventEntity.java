@@ -24,9 +24,11 @@ public class InventoryEventEntity {
     @Column(length = 100)
     @Id
     private String eventType;
+    @Column(length = 1000)
     private String eventPayload;
     private int eventSequence;
     private int eventVersion;
+    @Column(length = 1000)
     private String metadata;
     private ZonedDateTime createdAt;
 

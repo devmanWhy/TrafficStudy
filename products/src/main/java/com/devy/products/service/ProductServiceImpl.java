@@ -5,12 +5,16 @@ import com.devy.common.event.product.InventoryCreatedEvent;
 import com.devy.common.event.product.InventoryReleasedEvent;
 import com.devy.common.event.product.InventoryReservedEvent;
 import com.devy.common.event.product.ProductEvent;
+import com.devy.common.event.product.command.CreateInventoryCommand;
 import com.devy.common.event.product.command.ReserveInventoryCommand;
 import com.devy.products.controller.response.SearchProductInfoResponseDTO;
-import com.devy.products.domain.*;
+import com.devy.products.domain.Inventory;
+import com.devy.products.domain.InventoryEventEntity;
+import com.devy.products.domain.Outbox;
+import com.devy.products.domain.Product;
 import com.devy.products.repository.jpa.InventoryEventEntityRepository;
-import com.devy.products.repository.jpa.InventoryRepository;
 import com.devy.products.repository.jpa.OutboxRepository;
+import com.devy.products.repository.jpa.ProductInventoryRepository;
 import com.devy.products.repository.jpa.ProductRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
@@ -21,21 +25,22 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
-    private final InventoryRepository inventoryRepository;
+    private final ProductInventoryRepository productInventoryRepository;
     private final OutboxRepository outboxRepository;
     private final ObjectMapper objectMapper;
     private final InventoryEventEntityRepository inventoryEventEntityRepository;
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
-    public ProductServiceImpl(ProductRepository productRepository, InventoryRepository inventoryRepository, OutboxRepository outboxRepository, ObjectMapper objectMapper, InventoryEventEntityRepository inventoryEventEntityRepository) {
+    public ProductServiceImpl(ProductRepository productRepository, ProductInventoryRepository productInventoryRepository, OutboxRepository outboxRepository, ObjectMapper objectMapper, InventoryEventEntityRepository inventoryEventEntityRepository) {
         this.productRepository = productRepository;
-        this.inventoryRepository = inventoryRepository;
+        this.productInventoryRepository = productInventoryRepository;
         this.outboxRepository = outboxRepository;
         this.objectMapper = objectMapper;
         this.inventoryEventEntityRepository = inventoryEventEntityRepository;
@@ -43,38 +48,46 @@ public class ProductServiceImpl implements ProductService {
 
     @PostConstruct
     public void init() {
-//        for (int index = 0; index < 10; index++) {
-//            Product product = new Product(
-//                    "product-" + index,
-//                    "상품 " + index,
-//                    "정말 좋은 상품.",
-//                    10000 + index
-//            );
-//            CreateInventoryCommand createInventoryCommand = new CreateInventoryCommand(
-//                    UUID.randomUUID().toString(),
-//                    product.getProductsId(),
-//                    100_000
-//            );
-//            productRepository.save(product);
-//            Inventory inventory = new Inventory();
-//            inventory.applyCommand(createInventoryCommand);
-//            inventory.getUnCommitedEvents().forEach(productEvent -> {
-//                inventoryEventEntityRepository.save(
-//                        new InventoryEventEntity(
-//                                createInventoryCommand.eventId,
-//                                inventory.getClass().getName(),
-//                                product.getProductsId(),
-//                                productEvent.getEventType(),
-//                                this.objectMapper.writeValueAsString(productEvent),
-//                                1,
-//                                1,
-//                                objectMapper.writeValueAsString(createInventoryCommand)
-//
-//                        )
-//                );
-//            });
-//            inventory.commit();
-//        }
+        for (int index = 0; index < 10; index++) {
+            Product product = new Product(
+                    "product-" + index,
+                    "상품 " + index,
+                    "정말 좋은 상품.",
+                    10000 + index
+            );
+            CreateInventoryCommand createInventoryCommand = new CreateInventoryCommand(
+                    UUID.randomUUID().toString(),
+                    product.getProductsId(),
+                    100_000
+            );
+            productRepository.save(product);
+            Inventory inventory = new Inventory();
+            inventory.applyCommand(createInventoryCommand);
+            inventory.getUnCommitedEvents().forEach(productEvent -> {
+                inventoryEventEntityRepository.save(
+                        new InventoryEventEntity(
+                                createInventoryCommand.eventId,
+                                inventory.getClass().getName(),
+                                product.getProductsId(),
+                                productEvent.getEventType(),
+                                this.objectMapper.writeValueAsString(productEvent),
+                                1,
+                                1,
+                                objectMapper.writeValueAsString(createInventoryCommand)
+
+                        )
+                );
+
+                outboxRepository.save(
+                        new Outbox(
+                                createInventoryCommand.eventId,
+                                productEvent.getClass().getName(),
+                                objectMapper.writeValueAsString(productEvent)
+                        )
+                );
+            });
+            inventory.commit();
+        }
     }
 
 
@@ -156,26 +169,6 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     @Override
     public void releaseInventory(String orderId, String productId, int quantity) {
-        Optional<Product> existProductsOptional = productRepository.findById(productId);
-        if (existProductsOptional.isEmpty()) return;
-        Product existProduct = existProductsOptional.get();
-        InventoryEntity existInventoryEntity = inventoryRepository.findByProductsId(existProduct.getProductsId()).get();
-        existInventoryEntity.release(quantity);
-        inventoryRepository.save(existInventoryEntity);
-        InventoryReleasedEvent inventoryReleasedEvent = new InventoryReleasedEvent(
-                orderId,
-                productId,
-                quantity
-        );
-
-        outboxRepository.save(
-                new Outbox(
-                        orderId,
-                        inventoryReleasedEvent.getClass().getName(),
-                        objectMapper.writeValueAsString(inventoryReleasedEvent)
-                )
-        );
-        log.info("Inventory is released : {}", existInventoryEntity);
     }
 
     @Override
@@ -185,7 +178,7 @@ public class ProductServiceImpl implements ProductService {
 
     private Inventory loadInventory(String productId) {
         Inventory inventory = new Inventory();
-        List<InventoryEventEntity> eventEntityList = inventoryEventEntityRepository.findByAggregateId(productId);
+        List<InventoryEventEntity> eventEntityList = inventoryEventEntityRepository.findByAggregateIdOrderByEventSequence(productId);
         List<ProductEvent> eventList = eventEntityList.stream().map(event -> {
             if (event.getEventType().equals(EventInfo.PRODUCTS.INVENTORY_CREATED_EVENT_CLASS.getName())) {
                 return objectMapper.readValue(event.getEventPayload(), InventoryCreatedEvent.class);

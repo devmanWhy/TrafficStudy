@@ -57,7 +57,7 @@ spring:
         connection-timeout: 30000
   jpa:
     hibernate:
-      ddl-auto: create  # 운영: validate, 개발: update, 초기: create
+      ddl-auto: update  # 운영: validate, 개발: update, 초기: create
     show-sql: false
     properties:
       hibernate:

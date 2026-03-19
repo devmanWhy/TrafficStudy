@@ -3,8 +3,8 @@ Content-Type: application/json
 
 {
   "userId": "user-001",
-  "productId": "product-1",
-  "quantity": 20,
+  "productId": "product-0",
+  "quantity": 1000,
   "totalAmount": 10000
 }
 

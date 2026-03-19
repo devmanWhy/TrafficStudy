@@ -1,5 +1,6 @@
 package com.devy.products.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
@@ -14,6 +15,7 @@ public class ProcessedEvent {
     String eventId;
     @Id
     String eventType;
+    @Column(length = 1000)
     String eventPayload;
     ZonedDateTime processedAt;
 

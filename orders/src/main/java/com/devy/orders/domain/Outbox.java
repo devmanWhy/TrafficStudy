@@ -1,5 +1,6 @@
 package com.devy.orders.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
@@ -13,6 +14,7 @@ public class Outbox {
     private String eventId;
     @Id
     private String eventType;
+    @Column(length = 1000)
     private String eventPayload;
     private boolean success;
 

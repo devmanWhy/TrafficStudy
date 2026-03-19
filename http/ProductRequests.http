@@ -16,5 +16,5 @@ Content-Type: application/json
 }
 ###
 
-GET localhost:8081/api/v1/inventory/product-1
+GET localhost:8081/api/v1/inventory/product-0
 Content-Type: application/json

@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface InventoryEventEntityRepository extends JpaRepository<InventoryEventEntity, InventoryEventEntity.InventoryEventEntityId> {
-    public List<InventoryEventEntity> findByAggregateId(String aggregateId);
+    public List<InventoryEventEntity> findByAggregateIdOrderByEventSequence(String aggregateId);
 }
