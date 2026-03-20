@@ -1,5 +1,7 @@
 package com.devy.common.event;
 
+import com.devy.common.event.order.OrderCancelledEvent;
+import com.devy.common.event.order.OrderConfirmedEvent;
 import com.devy.common.event.order.OrderPlacedEvent;
 import com.devy.common.event.order.command.CancelOrderCommand;
 import com.devy.common.event.order.command.ConfirmOrderCommand;
@@ -23,6 +25,8 @@ public class EventInfo {
         // Result
         public static final String ORDER_EVENT_TOPIC = "order-events";
         public static final Class<OrderPlacedEvent> ORDER_PLACED_EVENT_CLASS = OrderPlacedEvent.class;
+        public static final Class<OrderConfirmedEvent> ORDER_CONFIRMED_EVENT_CLASS = OrderConfirmedEvent.class;
+        public static final Class<OrderCancelledEvent> ORDER_CANCELLED_EVENT_CLASS = OrderCancelledEvent.class;
 
     }
 

@@ -3,9 +3,9 @@ Content-Type: application/json
 
 {
   "userId": "user-001",
-  "productId": "product-0",
+  "productId": "product-1",
   "quantity": 1000,
-  "totalAmount": 10000
+  "totalAmount": 100000
 }
 
 ###
@@ -14,6 +14,6 @@ Content-Type: application/json
 
 {
   "userId": "user-001",
-  "orderId": "7d461af50cab47e68821bee8659ed987"
+  "orderId": "db09bddd24834776a6ceaaf94040634b"
 }
 

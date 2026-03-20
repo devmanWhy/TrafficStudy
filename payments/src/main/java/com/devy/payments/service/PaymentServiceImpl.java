@@ -35,7 +35,9 @@ public class PaymentServiceImpl implements PaymentService {
     public boolean pay(String orderId, String userId, long amount) {
         try {
 
-//            throw new RuntimeException("Payment failed");
+            if(amount > 100_000) {
+                throw new RuntimeException("Payment failed");
+            }
             log.info("Paying order: {} for amount: {}", orderId, amount);
             String paymentId = java.util.UUID.randomUUID().toString();
             PaymentSucceedEvent paymentSucceedEvent = new PaymentSucceedEvent(orderId, userId);

@@ -1,16 +1,20 @@
 package com.devy.orders.domain;
 
+import com.devy.common.event.BaseCommand;
+import com.devy.common.event.BaseEvent;
+import com.devy.common.event.order.OrderCancelledEvent;
+import com.devy.common.event.order.OrderConfirmedEvent;
+import com.devy.common.event.order.OrderPlacedEvent;
+import com.devy.common.event.order.command.CancelOrderCommand;
+import com.devy.common.event.order.command.ConfirmOrderCommand;
+import com.devy.common.event.sourcing.AbstractEventSource;
 import com.devy.orders.domain.values.OrderStatus;
-import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
 
 import java.time.ZonedDateTime;
 
-@Entity
-public class Orders {
+public class Orders extends AbstractEventSource {
 
-    @Id
     private String orderId;
     private String userId;
     private String productsId;
@@ -84,5 +88,39 @@ public class Orders {
                 ", totalAmount=" + totalAmount +
                 ", orderAt=" + orderAt +
                 '}';
+    }
+
+    @Override
+    public BaseEvent handleCommand(BaseCommand command) {
+        BaseEvent event = null;
+        if (command instanceof ConfirmOrderCommand confirmOrderCommand) {
+            return new OrderConfirmedEvent(orderId);
+        }
+
+        if (command instanceof CancelOrderCommand cancelOrderCommand) {
+            return new OrderCancelledEvent(orderId);
+        }
+        return event;
+    }
+
+    @Override
+    public boolean handleEvent(BaseEvent event) {
+        if (event instanceof OrderPlacedEvent orderPlacedEvent) {
+            orderId = orderPlacedEvent.getOrderId();
+            userId = orderPlacedEvent.getUserId();
+            productsId = orderPlacedEvent.getProductId();
+            quantity = orderPlacedEvent.getQuantity();
+            totalAmount = orderPlacedEvent.getTotalAmount();
+            orderStatus = OrderStatus.PENDING;
+        }
+
+        if (event instanceof OrderConfirmedEvent orderConfirmedEvent) {
+            this.orderStatus = OrderStatus.COMPLETED;
+        }
+
+        if (event instanceof OrderCancelledEvent orderCancelledEvent) {
+            this.orderStatus = OrderStatus.CANCELLED;
+        }
+        return true;
     }
 }

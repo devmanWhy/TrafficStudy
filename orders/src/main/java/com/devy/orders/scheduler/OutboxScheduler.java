@@ -46,6 +46,8 @@ public class OutboxScheduler {
     }
 
     private boolean isOrderEvent(String eventType) {
-        return EventInfo.ORDERS.ORDER_PLACED_EVENT_CLASS.getName().equals(eventType);
+        return EventInfo.ORDERS.ORDER_CONFIRMED_EVENT_CLASS.getName().equals(eventType)
+                || EventInfo.ORDERS.ORDER_CANCELLED_EVENT_CLASS.getName().equals(eventType)
+                || EventInfo.ORDERS.ORDER_PLACED_EVENT_CLASS.getName().equals(eventType);
     }
 }

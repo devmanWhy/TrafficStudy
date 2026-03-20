@@ -53,8 +53,8 @@ public class OrderHistoryServiceImpl implements OrderHistoryService {
     }
 
     private Class findEventClass(String eventType) {
-        if (EventInfo.ORDERS.ORDER_PLACED_EVENT_CLASS.getName().equals(eventType)) {
-            return EventInfo.ORDERS.ORDER_PLACED_EVENT_CLASS;
+        if (EventInfo.ORDERS.ORDER_CONFIRMED_EVENT_CLASS.getName().equals(eventType)) {
+            return EventInfo.ORDERS.ORDER_CONFIRMED_EVENT_CLASS;
         }
         if (EventInfo.PRODUCTS.INVENTORY_RESERVED_EVENT_CLASS.getName().equals(eventType)) {
             return EventInfo.PRODUCTS.INVENTORY_RESERVED_EVENT_CLASS;
