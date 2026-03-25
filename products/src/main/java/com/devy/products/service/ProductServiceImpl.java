@@ -1,11 +1,6 @@
 package com.devy.products.service;
 
-import com.devy.common.event.EventInfo;
-import com.devy.common.event.product.InventoryCreatedEvent;
-import com.devy.common.event.product.InventoryReleasedEvent;
-import com.devy.common.event.product.InventoryReservedEvent;
 import com.devy.common.event.product.ProductEvent;
-import com.devy.common.event.product.command.CreateInventoryCommand;
 import com.devy.common.event.product.command.ReleaseInventoryCommand;
 import com.devy.common.event.product.command.ReserveInventoryCommand;
 import com.devy.common.event.product.registry.ProductEventRegistry;
@@ -18,16 +13,22 @@ import com.devy.products.repository.jpa.InventoryEventEntityRepository;
 import com.devy.products.repository.jpa.OutboxRepository;
 import com.devy.products.repository.jpa.ProductInventoryRepository;
 import com.devy.products.repository.jpa.ProductRepository;
+import com.devy.products.repository.redis.CacheRepository;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.data.redis.RedisSystemException;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
+
+import static com.devy.products.repository.redis.RedisRepository.PRODUCT_PREFIX;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -37,15 +38,17 @@ public class ProductServiceImpl implements ProductService {
     private final OutboxRepository outboxRepository;
     private final ObjectMapper objectMapper;
     private final InventoryEventEntityRepository inventoryEventEntityRepository;
+    private final CacheRepository cacheRepository;
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
-    public ProductServiceImpl(ProductRepository productRepository, ProductInventoryRepository productInventoryRepository, OutboxRepository outboxRepository, ObjectMapper objectMapper, InventoryEventEntityRepository inventoryEventEntityRepository) {
+    public ProductServiceImpl(ProductRepository productRepository, ProductInventoryRepository productInventoryRepository, OutboxRepository outboxRepository, ObjectMapper objectMapper, InventoryEventEntityRepository inventoryEventEntityRepository, CacheRepository cacheRepository) {
         this.productRepository = productRepository;
         this.productInventoryRepository = productInventoryRepository;
         this.outboxRepository = outboxRepository;
         this.objectMapper = objectMapper;
         this.inventoryEventEntityRepository = inventoryEventEntityRepository;
+        this.cacheRepository = cacheRepository;
     }
 
     @PostConstruct
@@ -207,9 +210,22 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
+    @CircuitBreaker(name = "getInventory", fallbackMethod = "fallbackGetInventory")
     @Override
     public Inventory getInventory(String productId) {
+        Inventory existInventory = findInventoryCache(productId);
+        if (existInventory != null) return existInventory;
         return loadInventory(productId);
+
+    }
+
+    private Inventory fallbackGetInventory(String productId, Throwable throwable) {
+        if (throwable instanceof RedisConnectionFailureException
+                || throwable instanceof RedisSystemException) {
+            log.info("Redis 조회 비정상 : DB 조회로 변경");
+            return loadInventory(productId);
+        }
+        return null;
     }
 
     private Inventory loadInventory(String productId) {
@@ -221,7 +237,21 @@ public class ProductServiceImpl implements ProductService {
             // Product Event 를 Apply 한다
             inventory.applyEvent(productEvent);
         });
+        try {
+            cacheRepository.save(PRODUCT_PREFIX + productId, inventory);
+        } catch (Exception e) {
+            log.warn("Redis 저장 이슈 : {}", e.toString());
+        }
 
         return inventory;
+    }
+
+    private @Nullable Inventory findInventoryCache(String productId) {
+        Inventory existInventory = cacheRepository.getValue(PRODUCT_PREFIX + productId, Inventory.class);
+        if (existInventory != null) {
+            log.info("Inventory exist : {} ", existInventory);
+            return existInventory;
+        }
+        return null;
     }
 }

@@ -3,6 +3,8 @@ server:
 
 spring:
   # Kafka 설정
+  config:
+    import: classpath:configs/circuit.yml
   kafka:
     bootstrap-servers: localhost:19092,localhost:19093,localhost:19094
     # Consumer 설정
@@ -53,3 +55,9 @@ spring:
         highlight_sql: true
         default_batch_fetch_size: 100
     open-in-view: false
+  data:
+    redis:
+      host: localhost
+      port: 16379
+      username: study
+      password: traffic
