@@ -17,7 +17,6 @@ import com.devy.products.repository.redis.CacheRepository;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
-import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.RedisConnectionFailureException;
@@ -216,12 +215,11 @@ public class ProductServiceImpl implements ProductService {
         Inventory existInventory = findInventoryCache(productId);
         if (existInventory != null) return existInventory;
         return loadInventory(productId);
-
     }
 
     private Inventory fallbackGetInventory(String productId, Throwable throwable) {
-        if (throwable instanceof RedisConnectionFailureException
-                || throwable instanceof RedisSystemException) {
+        if(throwable instanceof RedisConnectionFailureException
+        || throwable instanceof RedisSystemException) {
             log.info("Redis 조회 비정상 : DB 조회로 변경");
             return loadInventory(productId);
         }
@@ -237,20 +235,20 @@ public class ProductServiceImpl implements ProductService {
             // Product Event 를 Apply 한다
             inventory.applyEvent(productEvent);
         });
+
         try {
             cacheRepository.save(PRODUCT_PREFIX + productId, inventory);
         } catch (Exception e) {
-            log.warn("Redis 저장 이슈 : {}", e.toString());
+            log.warn("Redis 저장 이슈 : {}", e.getMessage());
         }
-
         return inventory;
     }
 
-    private @Nullable Inventory findInventoryCache(String productId) {
+    private Inventory findInventoryCache(String productId) {
         Inventory existInventory = cacheRepository.getValue(PRODUCT_PREFIX + productId, Inventory.class);
-        if (existInventory != null) {
-            log.info("Inventory exist : {} ", existInventory);
-            return existInventory;
+        if(existInventory != null) {
+            log.info("Inventory Cache {} is found", existInventory);
+            return  existInventory;
         }
         return null;
     }
