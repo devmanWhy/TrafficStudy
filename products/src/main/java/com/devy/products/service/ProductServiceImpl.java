@@ -214,12 +214,36 @@ public class ProductServiceImpl implements ProductService {
     public Inventory getInventory(String productId) {
         Inventory existInventory = findInventoryCache(productId);
         if (existInventory != null) return existInventory;
-        return loadInventory(productId);
+        if (cacheRepository.getLock(productId)) {
+            try {
+                log.info("getInventory 락 획득 성공! : {}", productId);
+                Inventory secondCache = findInventoryCache(productId);
+                if (secondCache != null) {
+                    log.info("secondCache 에서 데이터 찾음!");
+                    return secondCache;
+                }
+                return loadInventory(productId);
+            } catch (Exception e) {
+                log.error("락 획득 후 로직 실행 실패 : {}", e.getMessage());
+            } finally {
+                cacheRepository.releaseLock(productId);
+            }
+
+        } else {
+            log.info("getInventory 락 획득 실패!");
+            try {
+                Thread.sleep(100 + (int) (Math.random() * 50));
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            return getInventory(productId);
+        }
+        return null;
     }
 
     private Inventory fallbackGetInventory(String productId, Throwable throwable) {
-        if(throwable instanceof RedisConnectionFailureException
-        || throwable instanceof RedisSystemException) {
+        if (throwable instanceof RedisConnectionFailureException
+                || throwable instanceof RedisSystemException) {
             log.info("Redis 조회 비정상 : DB 조회로 변경");
             return loadInventory(productId);
         }
@@ -246,10 +270,14 @@ public class ProductServiceImpl implements ProductService {
 
     private Inventory findInventoryCache(String productId) {
         Inventory existInventory = cacheRepository.getValue(PRODUCT_PREFIX + productId, Inventory.class);
-        if(existInventory != null) {
+        if (existInventory != null) {
             log.info("Inventory Cache {} is found", existInventory);
-            return  existInventory;
+            return existInventory;
         }
         return null;
+    }
+
+    private void saveInventoryCache(Inventory inventory) {
+
     }
 }
