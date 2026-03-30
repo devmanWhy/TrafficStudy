@@ -234,6 +234,45 @@ services:
     command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
     restart: always
 
+  kafka-connect:
+    image: debezium/connect:3.0.0.Final
+    container_name: traffic-study-kafka-connect-cdc
+    ports:
+      - "18083:8083"
+    environment:
+      BOOTSTRAP_SERVERS: kafka-1:9092,kafka-2:9092,kafka-3:9092
+      GROUP_ID: traffic-study-connect-cluster
+      CONFIG_STORAGE_TOPIC: traffic_study_connect_configs
+      OFFSET_STORAGE_TOPIC: traffic_study_connect_offsets
+      STATUS_STORAGE_TOPIC: traffic_study_connect_statuses
+      KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      # Internal converter 설정
+      INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      # Converter 스키마 설정
+      KEY_CONVERTER_SCHEMAS_ENABLE: "false"
+      VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+      # Connect 로그 레벨
+      CONNECT_LOG_LEVEL: INFO
+      # 플러그인 경로
+      CONNECT_PLUGIN_PATH: /kafka/connect
+    depends_on:
+      mysql:
+        condition: service_healthy
+      kafka-1:
+        condition: service_healthy
+      kafka-2:
+        condition: service_healthy
+      kafka-3:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8083/" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 networks:
   monitoring:
     driver: bridge

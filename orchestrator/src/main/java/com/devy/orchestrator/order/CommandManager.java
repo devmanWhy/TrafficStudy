@@ -75,7 +75,7 @@ public class CommandManager {
     }
 
     private boolean isOrderPlacedEvent() {
-        return processedEvents.getLast().eventType.equals(EventInfo.ORDERS.ORDER_CONFIRMED_EVENT_CLASS.getName());
+        return processedEvents.getLast().eventType.equals(EventInfo.ORDERS.ORDER_PLACED_EVENT_CLASS.getName());
     }
 
     private boolean isInventoryReservedEvent() {

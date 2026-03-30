@@ -1,0 +1,32 @@
+{
+  "name": "traffic-study-mysql-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.mysql.MySqlConnector",
+    "tasks.max": "1",
+    "database.hostname": "mysql",
+    "database.port": "3306",
+    "database.user": "study_cdc",
+    "database.password": "traffic",
+    "database.server.id": "184054",
+    "topic.prefix": "cdc",
+    "database.include.list": "traffic_study",
+    "database.protocol": "jdbc:mysql",
+    "driver.parameters": "useSSL=false&allowPublicKeyRetrieval=true",
+    "database.connectionTimeZone": "Asia/Seoul",
+    "table.include.list": "traffic_study.outbox",
+    "schema.history.internal.kafka.bootstrap.servers": "kafka-1:9092,kafka-2:9092,kafka-3:9092",
+    "schema.history.internal.kafka.topic": "cdc.schema-changes",
+    "include.schema.changes": "false",
+    "transforms": "unwrap",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "transforms.unwrap.add.fields": "op",
+    "transforms.unwrap.drop.tombstones": "false",
+    "transforms.unwrap.delete.handling.mode": "rewrite",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": "false",
+    "value.converter.schemas.enable": "false",
+    "snapshot.mode": "initial",
+    "snapshot.locking.mode": "minimal"
+  }
+}

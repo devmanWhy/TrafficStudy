@@ -16,6 +16,7 @@ import com.devy.common.event.product.command.ReleaseInventoryCommand;
 import com.devy.common.event.product.command.ReserveInventoryCommand;
 
 public class EventInfo {
+    public static final String OUTBOX_TOPIC = "cdc.traffic_study.outbox";
     public static class ORDERS {
         // Command
         public static final String ORDER_COMMAND_TOPIC = "order-commands";

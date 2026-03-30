@@ -4,9 +4,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.annotation.JsonNaming;
 
 import java.util.Objects;
 
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @IdClass(Outbox.OutboxId.class)
 @Entity
 public class Outbox {

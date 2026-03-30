@@ -13,7 +13,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
-@Component
+//@Component
 public class OutboxScheduler {
 
     private Logger log = LoggerFactory.getLogger(this.getClass());

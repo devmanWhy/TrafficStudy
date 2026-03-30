@@ -44,7 +44,7 @@ public class PaymentCommandHandler {
                         doPaymentCommand.getUserId(),
                         doPaymentCommand.getTotalAmount()
                 );
-                log.info("ReserveInventoryCommand: {}", doPaymentCommand);
+                log.info("DoPaymentCommand: {}", doPaymentCommand);
 //                PaymentSucceedEvent paymentSucceedEvent = new PaymentSucceedEvent(
 //                        doPaymentCommand.getOrderId(),
 //                        doPaymentCommand.getUserId()

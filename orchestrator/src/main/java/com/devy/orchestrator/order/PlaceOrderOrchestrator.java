@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.devy.common.event.EventInfo.ORDERS.ORDER_CONFIRMED_EVENT_CLASS;
+import static com.devy.common.event.EventInfo.ORDERS.ORDER_PLACED_EVENT_CLASS;
 import static com.devy.common.event.EventInfo.PAYMENTS.PAYMENT_FAILED_EVENT_CLASS;
 import static com.devy.common.event.EventInfo.PAYMENTS.PAYMENT_SUCCEED_EVENT_CLASS;
 import static com.devy.common.event.EventInfo.PRODUCTS.INVENTORY_RELEASED_EVENT_CLASS;
@@ -44,9 +45,9 @@ public class PlaceOrderOrchestrator {
         JsonNode jsonNode = objectMapper.readTree(message);
         String eventId = jsonNode.get("eventId").asString();
         JsonNode eventType = jsonNode.get("eventType");
-        if (ORDER_CONFIRMED_EVENT_CLASS.getName().equals(eventType.asString())) {
+        if (ORDER_PLACED_EVENT_CLASS.getName().equals(eventType.asString())) {
             log.info("OrderPlacedEvent message : {}", message);
-            OrderPlacedEvent orderPlacedEvent = objectMapper.treeToValue(jsonNode, ORDER_CONFIRMED_EVENT_CLASS);
+            OrderPlacedEvent orderPlacedEvent = objectMapper.treeToValue(jsonNode, ORDER_PLACED_EVENT_CLASS);
             commandManagers.put(orderPlacedEvent.getOrderId(), new CommandManager(orderPlacedEvent.getOrderId()));
             kafkaTemplate.send(EventInfo.PRODUCTS.PRODUCT_COMMAND_TOPIC, objectMapper.writeValueAsString(getCommand(orderPlacedEvent)));
         }
