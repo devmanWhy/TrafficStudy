@@ -39,19 +39,14 @@ public class OutboxHandler {
         log.info("CDC 로 부터 이벤트 수신 : {}", message);
         JsonNode jsonNode = objectMapper.readTree(message);
         String operation = jsonNode.get("__op").asString();
-//        List<String> processOperation = List.of("r", "c");
-        List<String> processOperation = List.of("c");
-        if (processOperation.contains(operation)) {
-            Outbox notPublishedEvent = objectMapper.treeToValue(jsonNode, Outbox.class);
-            if (isOrderEvent(notPublishedEvent.getEventType())) {
-                log.info("Processing order event: {}", notPublishedEvent);
-                kafkaTemplate.send(EventInfo.ORDERS.ORDER_EVENT_TOPIC, notPublishedEvent.getEventPayload());
+        if("c".equals(operation)) {
+            Outbox outbox = objectMapper.treeToValue(jsonNode, Outbox.class);
+            if(isOrderEvent(outbox.getEventType())) {
+                log.info("Processing order event: {}", outbox);
+                kafkaTemplate.send(EventInfo.ORDERS.ORDER_EVENT_TOPIC, outbox.getEventPayload());
             }
         }
         ack.acknowledge();
-
-
-//        ack.acknowledge();
     }
 
     private boolean isOrderEvent(String eventType) {
