@@ -13,7 +13,7 @@
     "database.protocol": "jdbc:mysql",
     "driver.parameters": "useSSL=false&allowPublicKeyRetrieval=true",
     "database.connectionTimeZone": "Asia/Seoul",
-    "table.include.list": "traffic_study.outbox",
+    "table.include.list": "traffic_study.outbox, traffic_study.product",
     "schema.history.internal.kafka.bootstrap.servers": "kafka-1:9092,kafka-2:9092,kafka-3:9092",
     "schema.history.internal.kafka.topic": "cdc.schema-changes",
     "include.schema.changes": "false",

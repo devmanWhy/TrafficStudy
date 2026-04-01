@@ -22,6 +22,9 @@ public class ProductInventory {
         this.quantity = quantity;
     }
 
+    public void setProductDescription(String productDescription) {
+        this.productDescription = productDescription;
+    }
 
     public String getProductsId() {
         return productsId;
