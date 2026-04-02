@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface InventoryEventEntityRepository extends JpaRepository<InventoryEventEntity, InventoryEventEntity.InventoryEventEntityId> {
     public List<InventoryEventEntity> findByAggregateIdOrderByEventSequence(String aggregateId);
+    public List<InventoryEventEntity> findByAggregateIdAndEventSequenceGreaterThanOrderByEventSequence(String aggregateId, int eventSequence);
 }

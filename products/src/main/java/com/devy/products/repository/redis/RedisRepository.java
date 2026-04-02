@@ -75,4 +75,9 @@ public class RedisRepository implements CacheRepository {
         }
         return false;
     }
+
+    @Override
+    public void delete(String key) {
+        redisTemplate.delete(key);
+    }
 }

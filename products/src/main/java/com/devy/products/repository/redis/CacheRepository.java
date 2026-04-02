@@ -10,4 +10,5 @@ public interface CacheRepository {
     public <T> T getValue(String key, Class<T> clazz);
     public boolean getLock(String key);
     public boolean releaseLock(String key);
+    public void delete(String key);
 }

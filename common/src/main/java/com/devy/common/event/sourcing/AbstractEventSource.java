@@ -19,13 +19,18 @@ public abstract class AbstractEventSource {
         unCommittedEvents.add(baseEvent);
     }
 
+    public void applyEvents(List<BaseEvent> events) {
+        events.forEach(this::applyEvent);
+    }
+
     public void applyEvent(BaseEvent event) {
-        if(handleEvent(event)) {
+        if (handleEvent(event)) {
             currentSequence++;
         }
     }
 
     public abstract BaseEvent handleCommand(BaseCommand command);
+
     public abstract boolean handleEvent(BaseEvent event);
 
     public void commit() {

@@ -1,18 +1,12 @@
 package com.devy.products.service;
 
-import com.devy.common.event.product.ProductEvent;
+import com.devy.common.event.BaseEvent;
 import com.devy.common.event.product.command.ReleaseInventoryCommand;
 import com.devy.common.event.product.command.ReserveInventoryCommand;
 import com.devy.common.event.product.registry.ProductEventRegistry;
 import com.devy.products.controller.response.SearchProductInfoResponseDTO;
-import com.devy.products.domain.Inventory;
-import com.devy.products.domain.InventoryEventEntity;
-import com.devy.products.domain.Outbox;
-import com.devy.products.domain.Product;
-import com.devy.products.repository.jpa.InventoryEventEntityRepository;
-import com.devy.products.repository.jpa.OutboxRepository;
-import com.devy.products.repository.jpa.ProductInventoryRepository;
-import com.devy.products.repository.jpa.ProductRepository;
+import com.devy.products.domain.*;
+import com.devy.products.repository.jpa.*;
 import com.devy.products.repository.redis.CacheRepository;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.annotation.PostConstruct;
@@ -26,6 +20,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.devy.products.repository.redis.RedisRepository.PRODUCT_PREFIX;
 
@@ -37,16 +32,18 @@ public class ProductServiceImpl implements ProductService {
     private final OutboxRepository outboxRepository;
     private final ObjectMapper objectMapper;
     private final InventoryEventEntityRepository inventoryEventEntityRepository;
+    private final EventSnapshotEntityRepository eventSnapshotEntityRepository;
     private final CacheRepository cacheRepository;
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
-    public ProductServiceImpl(ProductRepository productRepository, ProductInventoryRepository productInventoryRepository, OutboxRepository outboxRepository, ObjectMapper objectMapper, InventoryEventEntityRepository inventoryEventEntityRepository, CacheRepository cacheRepository) {
+    public ProductServiceImpl(ProductRepository productRepository, ProductInventoryRepository productInventoryRepository, OutboxRepository outboxRepository, ObjectMapper objectMapper, InventoryEventEntityRepository inventoryEventEntityRepository, EventSnapshotEntityRepository eventSnapshotEntityRepository, CacheRepository cacheRepository) {
         this.productRepository = productRepository;
         this.productInventoryRepository = productInventoryRepository;
         this.outboxRepository = outboxRepository;
         this.objectMapper = objectMapper;
         this.inventoryEventEntityRepository = inventoryEventEntityRepository;
+        this.eventSnapshotEntityRepository = eventSnapshotEntityRepository;
         this.cacheRepository = cacheRepository;
     }
 
@@ -146,7 +143,7 @@ public class ProductServiceImpl implements ProductService {
             );
         });
 
-
+        cacheRepository.delete(PRODUCT_PREFIX + productId);
         log.info("Inventory {} is held", inventory);
     }
 
@@ -206,6 +203,7 @@ public class ProductServiceImpl implements ProductService {
                         )
                 );
             });
+
         }
     }
 
@@ -252,13 +250,23 @@ public class ProductServiceImpl implements ProductService {
 
     private Inventory loadInventory(String productId) {
         Inventory inventory = new Inventory();
-        List<InventoryEventEntity> eventEntityList = inventoryEventEntityRepository.findByAggregateIdOrderByEventSequence(productId);
-        eventEntityList.forEach(event -> {
+        List<InventoryEventEntity> eventEntityList;
+        Optional<EventSnapshotEntity> eventSnapshotOptional = eventSnapshotEntityRepository.findById(new EventSnapshotEntity.EventSnapshotEntityId(inventory.getClass().getName(), productId));
+        if (eventSnapshotOptional.isPresent()) {
+            log.info("SnapShot 으로 부터 데이터 가져옴");
+            EventSnapshotEntity eventSnapshotEntity = eventSnapshotOptional.get();
+            inventory = objectMapper.readValue(eventSnapshotEntity.getEntityPayload(), Inventory.class);
+            eventEntityList = inventoryEventEntityRepository.findByAggregateIdAndEventSequenceGreaterThanOrderByEventSequence(eventSnapshotEntity.getAggregateId(), eventSnapshotEntity.getEventSequence());
+        } else {
+            eventEntityList = inventoryEventEntityRepository.findByAggregateIdOrderByEventSequence(productId);
+        }
+
+        List<BaseEvent> list = eventEntityList.stream().map(event -> {
             // Product Event 를 가져온다.
-            ProductEvent productEvent = objectMapper.readValue(event.getEventPayload(), ProductEventRegistry.getEventClass(event.getEventType()));
+            return objectMapper.readValue(event.getEventPayload(), ProductEventRegistry.getEventClass(event.getEventType()));
             // Product Event 를 Apply 한다
-            inventory.applyEvent(productEvent);
-        });
+        }).collect(Collectors.toUnmodifiableList());
+        inventory.applyEvents(list);
 
         try {
             cacheRepository.save(PRODUCT_PREFIX + productId, inventory);

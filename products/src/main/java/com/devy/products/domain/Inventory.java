@@ -25,9 +25,9 @@ public class Inventory extends AbstractEventSource {
         this.quantity = quantity;
     }
 
-    public void applyEvents(List<ProductEvent> events) {
-        events.forEach(this::applyEvent);
-    }
+//    public void applyEvents(List<ProductEvent> events) {
+//        events.forEach(this::applyEvent);
+//    }
 
 
     @Override
