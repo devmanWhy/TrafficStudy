@@ -1,15 +1,10 @@
 package com.devy.products.handler;
 
 import com.devy.common.event.EventInfo;
-import com.devy.common.event.product.InventoryCreatedEvent;
-import com.devy.common.event.product.InventoryReleasedEvent;
-import com.devy.common.event.product.InventoryReservedEvent;
-import com.devy.common.event.product.ProductEvent;
 import com.devy.products.controller.response.SearchProductInfoResponseDTO;
-import com.devy.products.domain.Inventory;
-import com.devy.products.domain.ProcessedEvent;
-import com.devy.products.domain.Product;
-import com.devy.products.domain.ProductInventory;
+import com.devy.products.domain.*;
+import com.devy.products.repository.jpa.EventSnapshotEntityRepository;
+import com.devy.products.repository.jpa.InventoryEventEntityRepository;
 import com.devy.products.repository.jpa.ProcessedEventRepository;
 import com.devy.products.repository.jpa.ProductInventoryRepository;
 import com.devy.products.service.ProductService;
@@ -25,6 +20,9 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.PropertyNamingStrategies;
 import tools.jackson.databind.json.JsonMapper;
 
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -33,13 +31,15 @@ public class ProductEventHandler {
     private Logger log = LoggerFactory.getLogger(this.getClass());
     private final ProcessedEventRepository processedEventRepository;
     private final ProductInventoryRepository productInventoryRepository;
+    private final EventSnapshotEntityRepository eventSnapshotEntityRepository;
     private final ProductService productService;
     private final ObjectMapper objectMapper;
     private final ObjectMapper cdcObjectMapper;
 
-    public ProductEventHandler(ProcessedEventRepository processedEventRepository, ProductInventoryRepository productInventoryRepository, ProductService productService, ObjectMapper objectMapper) {
+    public ProductEventHandler(ProcessedEventRepository processedEventRepository, ProductInventoryRepository productInventoryRepository, InventoryEventEntityRepository inventoryEventEntityRepository, EventSnapshotEntityRepository eventSnapshotEntityRepository, ProductService productService, ObjectMapper objectMapper) {
         this.processedEventRepository = processedEventRepository;
         this.productInventoryRepository = productInventoryRepository;
+        this.eventSnapshotEntityRepository = eventSnapshotEntityRepository;
         this.productService = productService;
         this.objectMapper = objectMapper;
         this.cdcObjectMapper = JsonMapper.builder()
@@ -102,6 +102,34 @@ public class ProductEventHandler {
                     .ifPresent(productInventory -> {
                         productInventory.setProductDescription(product.getDescription());
                     });
+        }
+        acknowledgment.acknowledge();
+    }
+
+    @Transactional
+    @KafkaListener(topics = {EventInfo.INVENTORY_TOPIC})
+    public void handleInventoryEvent(String message, Acknowledgment acknowledgment) {
+        log.info("CDC 로 부터 이벤트 수신 : {}", message);
+        JsonNode jsonNode = cdcObjectMapper.readTree(message);
+        String operation = jsonNode.get("__op").asString();
+        // 초기에 DB 스냅샷 과정을 거칠때 => r, Insert -> c
+        List<String> operationList = Arrays.asList("r", "c");
+        if(operationList.contains(operation)) {
+            InventoryEventEntity inventoryEventEntity = cdcObjectMapper.treeToValue(jsonNode, InventoryEventEntity.class);
+            if(inventoryEventEntity.getEventSequence() % 5 == 0) {
+                log.info("Inventory 스냅샷 생성 시작");
+                Inventory inventory = productService.getInventory(inventoryEventEntity.getAggregateId());
+                eventSnapshotEntityRepository.save(
+                        new EventSnapshotEntity(
+                                inventory.getProductsId(),
+                                inventory.getClass().getName(),
+                                objectMapper.writeValueAsString(inventory),
+                                inventory.getCurrentSequence(),
+                                ZonedDateTime.now()
+                        )
+                );
+                log.info("스냅샷 생성 완료");
+            }
         }
         acknowledgment.acknowledge();
     }

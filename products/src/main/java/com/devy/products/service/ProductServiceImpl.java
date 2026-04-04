@@ -203,7 +203,7 @@ public class ProductServiceImpl implements ProductService {
                         )
                 );
             });
-
+            cacheRepository.delete(PRODUCT_PREFIX + productId);
         }
     }
 
@@ -251,7 +251,7 @@ public class ProductServiceImpl implements ProductService {
     private Inventory loadInventory(String productId) {
         Inventory inventory = new Inventory();
         List<InventoryEventEntity> eventEntityList;
-        Optional<EventSnapshotEntity> eventSnapshotOptional = eventSnapshotEntityRepository.findById(new EventSnapshotEntity.EventSnapshotEntityId(inventory.getClass().getName(), productId));
+        Optional<EventSnapshotEntity> eventSnapshotOptional = eventSnapshotEntityRepository.findById(new EventSnapshotEntity.EventSnapshotEntityId(productId, inventory.getClass().getName()));
         if (eventSnapshotOptional.isPresent()) {
             log.info("SnapShot 으로 부터 데이터 가져옴");
             EventSnapshotEntity eventSnapshotEntity = eventSnapshotOptional.get();
