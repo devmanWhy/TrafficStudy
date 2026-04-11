@@ -17,6 +17,7 @@ import com.devy.common.event.product.command.ReserveInventoryCommand;
 
 public class EventInfo {
     public static final String OUTBOX_TOPIC = "cdc.traffic_study.outbox";
+    public static final String ORDER_TOPIC = "cdc.traffic_study.order_event_entity";
     public static final String PRODUCT_TOPIC = "cdc.traffic_study.product";
     public static final String INVENTORY_TOPIC = "cdc.traffic_study.inventory_event_entity";
     public static class ORDERS {
