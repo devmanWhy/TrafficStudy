@@ -45,27 +45,29 @@ public class OrderEventHandler {
         String operation = jsonNode.get("__op").asString();
         // 초기에 DB 스냅샷 과정을 거칠때 => r, Insert -> c
         List<String> operationList = Arrays.asList("r", "c");
-        if(operationList.contains(operation)) {
+        if (operationList.contains(operation)) {
             String eventType = jsonNode.get("event_type").asString();
             String eventPayLoad = jsonNode.get("event_payload").asString();
-            salesService.updateSales(getOrderEvent(eventType, eventPayLoad));
+            OrderEvent orderEvent = getOrderEvent(eventType, eventPayLoad);
+            if(orderEvent != null) {
+                salesService.updateSales(orderEvent);
+            }
         }
-
         acknowledgment.acknowledge();
-
     }
 
-    public OrderEvent getOrderEvent(String eventType, String eventPayLoad) {
+    public OrderEvent getOrderEvent(String eventType, String eventPayload) {
         if (OrderPlacedEvent.class.getName().equals(eventType)) {
-            return objectMapper.readValue(eventPayLoad, OrderPlacedEvent.class);
+            return objectMapper.readValue(eventPayload, OrderPlacedEvent.class);
         }
         if (OrderConfirmedEvent.class.getName().equals(eventType)) {
-            return objectMapper.readValue(eventPayLoad, OrderConfirmedEvent.class);
+            return objectMapper.readValue(eventPayload, OrderConfirmedEvent.class);
         }
         if (OrderCancelledEvent.class.getName().equals(eventType)) {
-            return objectMapper.readValue(eventPayLoad, OrderCancelledEvent.class);
+            return objectMapper.readValue(eventPayload, OrderCancelledEvent.class);
         }
         return null;
     }
+
 
 }

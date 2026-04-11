@@ -30,36 +30,45 @@ public class SalesServiceImpl implements SalesService {
         this.orderHistoryRepository = orderHistoryRepository;
     }
 
+
     @Override
     public void updateSales(OrderEvent orderEvent) {
         if (orderEvent instanceof OrderPlacedEvent orderPlacedEvent) {
+            log.info("주문 접수 됨 : {}", orderPlacedEvent);
             orderHistoryRepository.save(
                     new OrderHistory(
                             orderPlacedEvent.getOrderId(),
                             orderPlacedEvent.getTotalAmount(),
-                            false,
-                            orderPlacedEvent.eventAt.toInstant().toEpochMilli()
+                            false
                     )
             );
         }
 
         if (orderEvent instanceof OrderConfirmedEvent orderConfirmedEvent) {
+            // orderHistory 조회
             Optional<OrderHistory> orderHistory = orderHistoryRepository.findById(orderConfirmedEvent.getOrderId());
             if (orderHistory.isPresent()) {
-                String date = ZonedDateTime.ofInstant(Instant.ofEpochMilli(orderHistory.get().getEventAt()), ZoneId.of("Asia/Seoul"))
-                        .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+                ZonedDateTime eventZonedDateTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(orderHistory.get().getEventAt()), ZoneId.of("Asia/Seoul"));
+                String date = eventZonedDateTime.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+                // 오늘 날짜의 Sales 데이터가 있는지
                 Optional<Sales> optionalSales = salesRepository.findByDate(date).stream().findFirst();
+                // 있으면 Update 없으면 INSERT (UPSERT)
                 if (optionalSales.isPresent()) {
+                    log.info("오늘 매출액 데이터 존재 : {}, {}", optionalSales.get(), orderConfirmedEvent);
                     optionalSales.get().updateTotalAmount(orderHistory.get().getTotalAmount());
                     salesRepository.save(optionalSales.get());
                 } else {
-                    salesRepository.save(new Sales(
-                            date,
-                            orderHistory.get().getTotalAmount()
-                    ));
+                    log.info("오늘 매출액 데이터 미존재, 신규 생성 : {}", orderConfirmedEvent);
+                    salesRepository.save(
+                            new Sales(
+                                    date,
+                                    orderHistory.get().getTotalAmount()
+                            )
+                    );
                 }
             }
         }
+
 
     }
 
@@ -67,5 +76,4 @@ public class SalesServiceImpl implements SalesService {
     public Sales getSalesByDate(String date) {
         return salesRepository.findByDate(date).stream().findFirst().orElse(null);
     }
-
 }

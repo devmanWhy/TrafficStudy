@@ -5,7 +5,7 @@ Content-Type: application/json
   "userId": "user-001",
   "productId": "product-0",
   "quantity": 100,
-  "totalAmount": 3000
+  "totalAmount": 100000
 }
 
 ###
@@ -17,3 +17,5 @@ Content-Type: application/json
   "orderId": "63cc43a77a7a4e38b829a538b5f54abf"
 }
 
+###
+GET http://localhost:8086/api/v1/sales/20260411
